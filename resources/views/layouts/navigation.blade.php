@@ -1,91 +1,119 @@
 <!-- resources/views/layouts/navigation.blade.php -->
-<nav class="navbar navbar-expand-lg navbar-premium sticky-top">
+<!-- 
+    Navigation Legacy (Bootstrap) — Mise à jour pour utiliser le système de thème.
+    Ce fichier est gardé pour la compatibilité avec les pages qui l'utilisent directement.
+    La navigation principale est maintenant dans components/layout/navbar.blade.php
+-->
+<nav class="navbar navbar-expand-lg sticky-top" style="background: var(--navbar-bg); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(10px);">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
-            <i class="fas fa-cubes me-2"></i>
+        <!-- Logo / Brand -->
+        <a class="navbar-brand" href="{{ route('dashboard') }}" style="color: var(--text-primary); font-weight: 800;">
+            <i class="fas fa-cubes me-2" style="color: var(--accent);"></i>
             Stoki
         </a>
         
-        <!-- BOUTON TOGGLE AVEC STYLE -->
+        <!-- Bouton toggle pour mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                style="border-color: var(--accent);">
             <span class="navbar-toggler-icon">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-bars" style="color: var(--accent);"></i>
             </span>
         </button>
         
         <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Menu principal - gauche -->
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link nav-link-premium {{ request()->routeIs('dashboard') ? 'active' : '' }}" 
-                       href="{{ route('dashboard') }}">
+                    <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" 
+                       href="{{ route('dashboard') }}" style="color: var(--text-secondary); transition: all 0.2s ease;">
                         <i class="fas fa-home me-2"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
+                
                 <li class="nav-item">
-                    <a class="nav-link nav-link-premium {{ request()->routeIs('products.*') ? 'active' : '' }}" 
-                       href="{{ route('products.index') }}">
+                    <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" 
+                       href="{{ route('products.index') }}" style="color: var(--text-secondary); transition: all 0.2s ease;">
                         <i class="fas fa-box me-2"></i>
                         <span>Produits</span>
                     </a>
                 </li>
+                
                 <li class="nav-item">
-                    <a class="nav-link nav-link-premium {{ request()->routeIs('categories.*') ? 'active' : '' }}" 
-                       href="{{ route('categories.index') }}">
+                    <a class="nav-link {{ request()->routeIs('stock-movements.*') ? 'active' : '' }}" 
+                       href="{{ route('stock-movements.index') }}" style="color: var(--text-secondary); transition: all 0.2s ease;">
+                        <i class="fas fa-history me-2"></i>
+                        <span>Historique Stock</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" 
+                       href="{{ route('categories.index') }}" style="color: var(--text-secondary); transition: all 0.2s ease;">
                         <i class="fas fa-tags me-2"></i>
                         <span>Catégories</span>
                     </a>
                 </li>
+                
                 <li class="nav-item">
-                    <a class="nav-link nav-link-premium {{ request()->routeIs('invoices.*') ? 'active' : '' }}" 
-                       href="{{ route('invoices.index') }}">
+                    <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}" 
+                       href="{{ route('invoices.index') }}" style="color: var(--text-secondary); transition: all 0.2s ease;">
                         <i class="fas fa-file-invoice me-2"></i>
                         <span>Factures</span>
                     </a>
                 </li>
+                
             </ul>
             
+            <!-- Menu secondaire - droite -->
             <ul class="navbar-nav">
+                <!-- Theme Toggle -->
+                <li class="nav-item d-flex align-items-center me-2">
+                    <button onclick="toggleTheme()" class="theme-toggle-btn" title="Basculer le thème" type="button">
+                        <i class="fas fa-moon theme-icon"></i>
+                    </button>
+                </li>
+
                 <!-- Notifications -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link nav-link-premium position-relative" href="#" id="notificationDropdown" 
-                       role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill notification-badge" 
-                              style="background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%); color: #F3E0DC; display: none;">0</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end premium-card" 
-                         style="width: 350px; max-height: 400px; overflow-y: auto;">
-                        <div class="dropdown-header d-flex justify-content-between align-items-center p-3">
-                            <h6 class="mb-0" style="color: #F3E0DC;">Notifications</h6>
-                            <button class="btn btn-sm btn-premium mark-all-read">
-                                <i class="fas fa-check-double"></i>
-                            </button>
-                        </div>
-                        <div class="notification-list">
-                            <!-- Les notifications seront chargées ici -->
-                        </div>
-                        <div class="dropdown-footer text-center p-3">
-                            <a href="{{ route('notifications.index') }}" class="btn-premium btn-sm">
-                                Voir toutes les notifications
-                            </a>
-                        </div>
-                    </div>
+                <li class="nav-item d-flex align-items-center me-2">
+                    <x-notification-bell />
                 </li>
                 
                 <!-- Utilisateur -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link nav-link-premium dropdown-toggle" href="#" id="userDropdown" 
-                       role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" 
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                       style="color: var(--text-secondary);">
                         <i class="fas fa-user-circle me-2"></i>
-                        <span>{{ Auth::user()->name ?? 'Compte' }}</span>
+                        <span class="d-none d-lg-inline">{{ Auth::user()->name ?? 'Compte' }}</span>
                     </a>
-                    <ul class="dropdown-menu premium-card">
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 200px; background: var(--bg-surface); border-color: var(--border-color);">
+                        <li>
+                            <span class="dropdown-item-text" style="color: var(--text-muted);">
+                                <i class="fas fa-user me-2"></i>
+                                {{ Auth::user()->email ?? 'Email' }}
+                            </span>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('dashboard') }}" style="color: var(--text-primary);">
+                                <i class="fas fa-tachometer-alt me-2" style="color: var(--accent);"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('stock-movements.index') }}" style="color: var(--text-primary);">
+                                <i class="fas fa-exchange-alt me-2" style="color: var(--accent);"></i>
+                                Mouvements de stock
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item" style="color: #BC4639;">
+                                <button type="submit" class="dropdown-item" style="color: var(--color-danger);">
                                     <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
                                 </button>
                             </form>
@@ -98,9 +126,9 @@
 </nav>
 
 <style>
-/* Styles spécifiques pour le toggle button */
+/* Styles spécifiques pour le toggle button mobile */
 .navbar-toggler {
-    border: 2px solid #4285f4 !important;
+    border: 2px solid var(--accent) !important;
     border-radius: 10px !important;
     padding: 8px 12px !important;
     background: transparent !important;
@@ -108,12 +136,12 @@
 }
 
 .navbar-toggler:hover {
-    background: rgba(66, 133, 244, 0.1) !important;
+    background: var(--accent-light) !important;
     transform: scale(1.05);
 }
 
 .navbar-toggler:focus {
-    box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25) !important;
+    box-shadow: 0 0 0 0.2rem var(--accent-ring) !important;
     outline: none !important;
 }
 
@@ -127,96 +155,99 @@
 }
 
 .navbar-toggler-icon i {
-    color: #4285f4 !important;
+    color: var(--accent) !important;
     font-size: 24px !important;
     transition: all 0.3s ease !important;
 }
 
-.navbar-toggler:hover .navbar-toggler-icon i {
-    color: #D4A59A !important;
-}
-
-/* Animation du toggle */
-.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon i {
-    transform: rotate(90deg);
-}
-
 /* Style pour mobile */
 @media (max-width: 991.98px) {
-    .navbar-premium {
-        padding: 10px 15px;
-    }
-    
     .navbar-collapse {
-        background: rgba(92, 32, 24, 0.95);
+        background: var(--bg-surface);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-radius: 15px;
         padding: 20px;
         margin-top: 15px;
-        border: 1px solid rgba(212, 165, 154, 0.3);
+        border: 1px solid var(--border-color);
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
-    .nav-link-premium {
+    .nav-link {
         text-align: center;
         margin: 5px 0 !important;
+        padding: 10px !important;
     }
+    
+    .dropdown-menu {
+        position: absolute !important;
+        left: auto !important;
+        right: 0 !important;
+    }
+}
+
+/* Style pour les dropdowns */
+.dropdown-menu {
+    background-color: var(--bg-surface) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color) !important;
+    border-radius: 15px !important;
+    padding: 8px !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+.dropdown-item {
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+    border-radius: 10px !important;
+    padding: 10px 15px !important;
+}
+
+.dropdown-item:hover {
+    background: var(--accent-light) !important;
+    transform: translateX(5px);
+}
+
+.nav-link.active {
+    color: var(--accent) !important;
+    font-weight: 700;
+}
+
+.nav-link:hover {
+    color: var(--text-primary) !important;
 }
 </style>
 
 <script>
-// Script pour les notifications
-$(document).ready(function() {
-    function loadNotifications() {
-        $.get('/notifications/latest', function(data) {
-            let notificationList = $('.notification-list');
-            let badge = $('.notification-badge');
-            
-            if (data.unread_count > 0) {
-                badge.text(data.unread_count).show();
+// ========== INITIALISATION DES TOOLTIPS ET TOGGLE ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Animation du toggle button mobile
+    var toggler = document.querySelector('.navbar-toggler');
+    if (toggler) {
+        toggler.addEventListener('click', function() {
+            var icon = this.querySelector('i');
+            if (icon.classList.contains('fa-bars')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
             } else {
-                badge.hide();
-            }
-            
-            if (data.notifications && data.notifications.length > 0) {
-                let html = '';
-                data.notifications.forEach(notification => {
-                    let notifData = notification.data;
-                    let time = new Date(notification.created_at).toLocaleString();
-                    let icon = notifData.icon || 'bell';
-                    html += `
-                        <a href="/notifications/${notification.id}" class="dropdown-item ${notification.read_at ? '' : 'bg-dark'}">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-${icon}" style="color: #4285f4;"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <small style="color: #D4A59A;" class="d-block">${time}</small>
-                                    <span style="color: #F3E0DC;">${notifData.message || 'Nouvelle notification'}</span>
-                                </div>
-                            </div>
-                        </a>
-                    `;
-                });
-                notificationList.html(html);
-            } else {
-                notificationList.html(`
-                    <div class="text-center p-4">
-                        <i class="fas fa-bell-slash fa-3x" style="color: #4285f4;"></i>
-                        <p style="color: #D4A59A;" class="mb-0">Aucune notification</p>
-                    </div>
-                `);
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
             }
         });
     }
-    
-    loadNotifications();
-    setInterval(loadNotifications, 30000);
-    
-    $('.mark-all-read').click(function() {
-        $.post('/notifications/mark-all-read', {
-            _token: '{{ csrf_token() }}'
-        }, loadNotifications);
+
+    // Empêcher la propagation des clics sur les dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
+        menu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
     });
 });
 </script>

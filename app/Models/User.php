@@ -5,12 +5,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
     ];
 
     /**
@@ -44,5 +46,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relation : toutes les notifications de l'utilisateur
+     * Utilise la table personnalisée notifications (avec is_read boolean)
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id')->latest();
+    }
+
+    /**
+     * Relation : notifications non lues
+     */
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id')
+            ->where('is_read', false)
+            ->latest();
     }
 }

@@ -12,98 +12,91 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Statistiques de base
         $totalProducts = Product::count();
         $totalCategories = Category::count();
         $totalStock = Product::sum('quantity');
-        $lowStockProducts = Product::whereRaw('quantity <= min_stock')->count();
         
-        // Derniers mouvements
-        $recentMovements = StockMovement::with('product')
-            ->latest()
-            ->take(10)
-            ->get();
+        // Alertes stock
+        $lowStockProducts = Product::whereRaw('quantity <= min_stock')->latest()->take(5)->get();
+        $lowStockCount = Product::whereRaw('quantity <= min_stock')->count();
         
         // Valeur du stock
-        $stockValue = Product::sum(DB::raw('price * quantity'));
+        $totalStockValue = Product::sum(DB::raw('price * quantity'));
         
-        // Données pour le graphique à barres (évolution du stock sur 7 jours)
-        $stockEvolution = $this->getStockEvolution();
-        
-        // Produits les plus vendus
-        $topProducts = Product::withCount(['stockMovements as total_sold' => function($query) {
-                $query->where('type', 'out')
-                      ->select(DB::raw('SUM(quantity)'));
-            }])
-            ->orderBy('total_sold', 'desc')
-            ->take(5)
-            ->get();
-        
-        // Dernières factures
-        $recentInvoices = Invoice::with('product')
+        // Mouvements mensuels (30 derniers jours)
+        $monthlyInCount = StockMovement::where('type', 'in')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count();
+            
+        // Derniers mouvements pour la table
+        $recentMovements = StockMovement::with('product')
             ->latest()
             ->take(5)
             ->get();
+            
+        // Factures & CA
+        $caTotal = Invoice::where('payment_status', 'paid')->sum('total_amount');
+        $dernieresFactures = Invoice::with('product')->latest()->take(5)->get();
         
-        // Distribution par catégorie (pour un autre graphique)
-        $categoryDistribution = Category::withCount('products')
-            ->having('products_count', '>', 0)
-            ->get();
+        // --- chart date range ---
+        $dateFrom = $request->filled('date_from')
+            ? \Carbon\Carbon::parse($request->date_from)->startOfDay()
+            : \Carbon\Carbon::now()->subDays(29)->startOfDay();
+            
+        $dateTo = $request->filled('date_to')
+            ? \Carbon\Carbon::parse($request->date_to)->endOfDay()
+            : \Carbon\Carbon::now()->endOfDay();
+            
+        // --- build daily data between dateFrom and dateTo ---
+        $period = \Carbon\Carbon::parse($dateFrom)->daysUntil(\Carbon\Carbon::parse($dateTo)->addDay());
+        
+        $entriesByDay = StockMovement::where('type', 'in')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
+            
+        $exitsByDay = StockMovement::where('type', 'out')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
+            
+        $chartLabels  = [];
+        $chartEntrees = [];
+        $chartSorties = [];
+        
+        foreach ($period as $date) {
+            $key = $date->format('Y-m-d');
+            $chartLabels[]  = $date->format('d/m');
+            $chartEntrees[] = (int) ($entriesByDay[$key] ?? 0);
+            $chartSorties[] = (int) ($exitsByDay[$key] ?? 0);
+        }
+        
+        $totalEntrees = array_sum($chartEntrees);
+        $totalSorties = array_sum($chartSorties);
         
         return view('dashboard.index', compact(
             'totalProducts',
             'totalCategories',
             'totalStock',
+            'lowStockCount',
             'lowStockProducts',
+            'totalStockValue',
+            'monthlyInCount',
             'recentMovements',
-            'stockValue',
-            'topProducts',
-            'recentInvoices',
-            'stockEvolution',
-            'categoryDistribution'
+            'caTotal',
+            'dernieresFactures',
+            'chartLabels',
+            'chartEntrees',
+            'chartSorties',
+            'totalEntrees',
+            'totalSorties',
+            'dateFrom',
+            'dateTo'
         ));
-    }
-
-    /**
-     * Récupérer l'évolution du stock sur les 7 derniers jours
-     */
-    private function getStockEvolution()
-    {
-        $data = [];
-        $labels = [];
-        
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $labels[] = $date->format('d/m');
-            
-            // Total des entrées ce jour-là
-            $entries = StockMovement::whereDate('created_at', $date)
-                ->where('type', 'in')
-                ->sum('quantity');
-            
-            // Total des sorties ce jour-là
-            $exits = StockMovement::whereDate('created_at', $date)
-                ->where('type', 'out')
-                ->sum('quantity');
-            
-            // Stock net = entrées - sorties
-            $netStock = $entries - $exits;
-            
-            $data[] = [
-                'date' => $date->format('Y-m-d'),
-                'entries' => $entries,
-                'exits' => $exits,
-                'net' => $netStock
-            ];
-        }
-        
-        return [
-            'labels' => $labels,
-            'entries' => array_column($data, 'entries'),
-            'exits' => array_column($data, 'exits'),
-            'net' => array_column($data, 'net')
-        ];
     }
 }

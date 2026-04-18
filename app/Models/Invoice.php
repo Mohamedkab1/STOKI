@@ -41,9 +41,9 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
     
-    public function stockMovement(): BelongsTo
+    public function stockMovements(): HasMany
     {
-        return $this->belongsTo(StockMovement::class);
+        return $this->hasMany(StockMovement::class, 'invoice_id');
     }
 
     public static function generateInvoiceNumber($type)

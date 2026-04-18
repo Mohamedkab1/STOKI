@@ -15,7 +15,7 @@
                             @if(is_array($value))
                                 {{ json_encode($value) }}
                             @elseif(is_numeric($value) && (strpos($key, 'price') !== false || strpos($key, 'amount') !== false || strpos($key, 'total') !== false))
-                                {{ number_format($value, 2) }} €
+                                {{ number_format($value, 2) }} DH
                             @else
                                 {{ $value }}
                             @endif

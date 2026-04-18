@@ -11,12 +11,14 @@ class Product extends Model
 {
     protected $fillable = [
         'name', 'sku', 'description', 'image',
-        'price', 'quantity', 'min_stock', 
+        'price', 'purchase_price', 'selling_price', 'quantity', 'min_stock', 
         'category_id'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'purchase_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
         'quantity' => 'integer',
         'min_stock' => 'integer'
     ];
@@ -63,5 +65,24 @@ class Product extends Model
     public function getDefaultImageAttribute()
     {
         return 'https://via.placeholder.com/300x200?text=' . urlencode($this->name);
+    }
+
+    public function getCurrentStock()
+    {
+        // Recalculer le stock réel à partir des mouvements
+        $entries = StockMovement::where('product_id', $this->id)->where('type', 'in')->sum('quantity');
+        $exits = StockMovement::where('product_id', $this->id)->where('type', 'out')->sum('quantity');
+        $calculatedStock = $entries - $exits;
+        
+        // Si différent, corriger
+        if ($this->quantity != $calculatedStock) {
+            \Log::warning("Stock incohérent pour produit {$this->id}", [
+                'stock_actuel' => $this->quantity,
+                'stock_calcule' => $calculatedStock
+            ]);
+            $this->update(['quantity' => $calculatedStock]);
+        }
+        
+        return $this->quantity;
     }
 }

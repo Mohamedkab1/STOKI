@@ -1,3 +1,97 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #4f46e5;
+  --color-brand-primary-hover: #4338ca;
+  --color-brand-secondary: #0f172a;
+  
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-bg-app: var(--bg-app);
+  --color-bg-card: var(--bg-card);
+  --color-border-subtle: var(--border-subtle);
+  
+  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* Variante dark : supporte la classe .dark ET l'attribut data-theme="dark" */
+@variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --border-subtle: #e2e8f0;
+
+  --nav-backdrop: rgba(255, 255, 255, 0.82);
+  --sidebar-active: rgba(79, 70, 229, 0.05);
+  --grid-color: rgba(0, 0, 0, 0.04);
+}
+
+.dark,
+[data-theme="dark"] {
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --border-subtle: #334155;
+
+  --nav-backdrop: rgba(15, 23, 42, 0.85);
+  --sidebar-active: rgba(255, 255, 255, 0.04);
+  --grid-color: rgba(255, 255, 255, 0.04);
+  
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    @apply antialiased transition-colors duration-300;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-subtle rounded-full hover:bg-text-muted transition-colors;
+  }
+}
+
+@layer components {
+  .premium-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    @apply rounded-xl shadow-premium transition-all duration-300;
+  }
+  
+  /* Indicators */
+  .indicator-indigo { @apply bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400; }
+  .indicator-rose { @apply bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400; }
+  .indicator-emerald { @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400; }
+  .indicator-sky { @apply bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400; }
+
+  .modern-table-header {
+    background-color: var(--sidebar-active);
+    @apply text-xs font-black uppercase tracking-widest text-text-muted border-b border-border-subtle;
+  }
+
+  .animate-in {
+    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Semantic Classes mapping to variables for blade files */
+.text-main { color: var(--text-main); }
+.text-muted { color: var(--text-muted); }
+.bg-app { background-color: var(--bg-app); }
+.bg-card { background-color: var(--bg-card); }
+.border-border-subtle { border-color: var(--border-subtle); }
+.bg-sidebar-active { background-color: var(--sidebar-active); }
+.bg-nav-backdrop { background-color: var(--nav-backdrop); }

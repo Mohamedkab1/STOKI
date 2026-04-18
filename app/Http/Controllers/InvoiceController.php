@@ -35,8 +35,16 @@ class InvoiceController extends Controller
         }
         
         $invoices = $query->latest()->paginate(15);
+
+        // Statistiques pour les KPIs
+        $stats = [
+            'total_sales' => Invoice::where('type', 'sale')->sum('total_amount'),
+            'total_purchases' => Invoice::where('type', 'purchase')->sum('total_amount'),
+            'pending_amount' => Invoice::where('payment_status', 'pending')->sum('total_amount'),
+            'count' => Invoice::count()
+        ];
         
-        return view('invoices.index', compact('invoices'));
+        return view('invoices.index', compact('invoices', 'stats'));
     }
 
     public function show(Invoice $invoice)

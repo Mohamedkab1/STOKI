@@ -1,59 +1,55 @@
 <?php
-// app/Http/Controllers/ProfileController.php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
     /**
-     * Afficher le formulaire de modification du profil
+     * Afficher la page de profil
      */
     public function edit(Request $request)
     {
-        return view('profile.edit', [
-            'user' => $request->user()
-        ]);
+        $user = $request->user();
+        return view('profile.index', compact('user'));
     }
 
     /**
-     * Mettre à jour le profil
+     * Mettre à jour les infos personnelles
      */
     public function update(Request $request)
     {
         $user = $request->user();
-        
-        $request->validate([
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
         ]);
 
-        $user->update($request->only('name', 'email'));
+        $user->update($validated);
 
-        return back()->with('status', 'profile-updated');
+        return back()->with('success', 'Profil mis à jour avec succès.');
     }
 
     /**
-     * Supprimer le compte
+     * Changer le mot de passe
      */
-    public function destroy(Request $request)
+    public function updatePassword(Request $request)
     {
-        $request->validate([
-            'password' => 'required|current_password',
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user = $request->user();
+        $request->user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
 
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        return back()->with('success', 'Mot de passe modifié avec succès.');
     }
 }

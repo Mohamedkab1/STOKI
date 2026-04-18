@@ -1,0 +1,200 @@
+/*
+ * =================================================================
+ *  STOKI ERP — Layout Principal & Responsive
+ *  Fichier : public/css/layout.css
+ * =================================================================
+ */
+
+/* Base layout */
+.app-body {
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg-page);
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: 260px;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+/* Main area shifts right by sidebar width on desktop */
+.app-main {
+  flex: 1;
+  margin-left: 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+/* Navbar */
+.app-navbar {
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--navbar-border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+}
+
+/* Page content */
+.app-content {
+  padding: 24px;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+/* Overlay pour Sidebar Mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 90;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active { 
+  display: block; 
+}
+
+/* Hamburger button — hidden on desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================================================
+   RESPONSIVE (TABLETTE)
+   ================================================================ */
+@media (max-width: 1024px) {
+  .app-sidebar {
+    transform: translateX(-260px);
+  }
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+  .app-main {
+    margin-left: 0;
+  }
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE (MOBILE)
+   ================================================================ */
+@media (max-width: 640px) {
+  .app-content {
+    padding: 16px;
+  }
+  .app-navbar {
+    padding: 0 16px;
+  }
+}
+
+/* ================================================================
+   COMPOSANTS DE PAGE GÉNÉRIQUES
+   ================================================================ */
+
+/* Grilles pour cards/stats */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (min-width: 640px) {
+  .grid-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .grid-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Tables Responsives */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card); /* Ajoute le background car la table est à l'intérieur */
+}
+.table-responsive table {
+  min-width: 600px; /* force scroll horizontal si l'écran est petit */
+  width: 100%;
+  margin: 0;
+}
+
+/* Formulaires en grille */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Titres de page */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .page-title {
+    font-size: 18px;
+  }
+  /* Les boutons d'actions prennent 100% sur mobile */
+  .page-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

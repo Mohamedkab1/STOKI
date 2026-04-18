@@ -1,0 +1,483 @@
+/*
+ * =================================================================
+ *  STOKI ERP — Système de Thème Complet (Clair / Sombre)
+ *  Fichier : public/css/theme.css
+ *
+ *  Toutes les variables CSS utilisées dans l'application.
+ *  Le thème est basculé via la classe .dark sur <html>.
+ *  Aucune couleur hardcodée permise dans les vues Blade.
+ * =================================================================
+ */
+
+/* ========================== MODE CLAIR (défaut) ========================== */
+:root {
+    /* --- Arrière-plans --- */
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-overlay: rgba(15, 23, 42, 0.4);
+
+    /* --- Textes --- */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* --- Bordures --- */
+    --border-color: #e2e8f0;
+    --border-subtle: #f1f5f9;
+
+    /* --- Accent principal --- */
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-light: rgba(79, 70, 229, 0.08);
+    --accent-ring: rgba(79, 70, 229, 0.15);
+
+    /* --- Sidebar --- */
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #94a3b8;
+    --sidebar-active: rgba(255, 255, 255, 0.1);
+    --sidebar-active-text: #ffffff;
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+
+    /* --- Navbar --- */
+    --navbar-bg: rgba(255, 255, 255, 0.85);
+    --navbar-border: #e2e8f0;
+
+    /* --- Tables --- */
+    --table-header-bg: #f8fafc;
+    --table-row-hover: rgba(0, 0, 0, 0.03);
+    --table-stripe: rgba(0, 0, 0, 0.015);
+
+    /* --- Inputs / Formulaires --- */
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --input-focus: #4f46e5;
+    --input-focus-ring: rgba(79, 70, 229, 0.15);
+
+    /* --- Bouton Principal --- */
+    --btn-primary-bg: #4f46e5;
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover: #4338ca;
+    --btn-primary-ring: rgba(79, 70, 229, 0.2);
+
+    /* --- Badges / Status --- */
+    --badge-success-bg: #ecfdf5;
+    --badge-success-text: #065f46;
+    --badge-success-border: #a7f3d0;
+
+    --badge-danger-bg: #fef2f2;
+    --badge-danger-text: #991b1b;
+    --badge-danger-border: #fecaca;
+
+    --badge-warning-bg: #fffbeb;
+    --badge-warning-text: #92400e;
+    --badge-warning-border: #fde68a;
+
+    --badge-info-bg: #eff6ff;
+    --badge-info-text: #1e40af;
+    --badge-info-border: #bfdbfe;
+
+    /* --- Couleurs de Mouvements de Stock --- */
+    --mouvement-entree-bg: rgba(22, 163, 74, 0.1);
+    --mouvement-entree-text: #16a34a;
+    --mouvement-entree-border: rgba(22, 163, 74, 0.25);
+
+    --mouvement-sortie-bg: rgba(220, 38, 38, 0.1);
+    --mouvement-sortie-text: #dc2626;
+    --mouvement-sortie-border: rgba(220, 38, 38, 0.25);
+
+    --mouvement-transfert-bg: rgba(37, 99, 235, 0.1);
+    --mouvement-transfert-text: #2563eb;
+    --mouvement-transfert-border: rgba(37, 99, 235, 0.25);
+
+    --mouvement-ajustement-bg: rgba(217, 119, 6, 0.1);
+    --mouvement-ajustement-text: #d97706;
+    --mouvement-ajustement-border: rgba(217, 119, 6, 0.25);
+
+    /* --- Alertes de Stock --- */
+    --stock-normal-color: #16a34a;
+    --stock-faible-color: #d97706;
+    --stock-epuise-color: #dc2626;
+
+    /* --- Couleurs de statut génériques --- */
+    --color-success: #16a34a;
+    --color-danger: #dc2626;
+    --color-warning: #d97706;
+    --color-info: #2563eb;
+
+    /* --- Ombres --- */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    /* --- Divers --- */
+    --toast-progress-bg: rgba(0, 0, 0, 0.08);
+    --scrollbar-thumb: #cbd5e1;
+    --scrollbar-track: transparent;
+    --card-radius: 14px;
+}
+
+/* ========================== MODE SOMBRE ========================== */
+.dark,
+[data-theme="dark"] {
+    /* --- Arrière-plans --- */
+    --bg-page: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-card: #1e293b;
+    --bg-elevated: #1e293b;
+    --bg-overlay: rgba(0, 0, 0, 0.6);
+
+    /* --- Textes --- */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #0f172a;
+
+    /* --- Bordures --- */
+    --border-color: #334155;
+    --border-subtle: #1e293b;
+
+    /* --- Accent principal --- */
+    --accent: #818cf8;
+    --accent-hover: #6366f1;
+    --accent-light: rgba(129, 140, 248, 0.12);
+    --accent-ring: rgba(129, 140, 248, 0.2);
+
+    /* --- Sidebar --- */
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #64748b;
+    --sidebar-active: rgba(255, 255, 255, 0.06);
+    --sidebar-active-text: #f1f5f9;
+    --sidebar-hover: rgba(255, 255, 255, 0.03);
+    --sidebar-border: rgba(255, 255, 255, 0.04);
+
+    /* --- Navbar --- */
+    --navbar-bg: rgba(15, 23, 42, 0.9);
+    --navbar-border: #334155;
+
+    /* --- Tables --- */
+    --table-header-bg: #0f172a;
+    --table-row-hover: rgba(255, 255, 255, 0.03);
+    --table-stripe: rgba(255, 255, 255, 0.015);
+
+    /* --- Inputs / Formulaires --- */
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --input-focus: #818cf8;
+    --input-focus-ring: rgba(129, 140, 248, 0.2);
+
+    /* --- Bouton Principal --- */
+    --btn-primary-bg: #818cf8;
+    --btn-primary-text: #0f172a;
+    --btn-primary-hover: #6366f1;
+    --btn-primary-ring: rgba(129, 140, 248, 0.25);
+
+    /* --- Badges / Status --- */
+    --badge-success-bg: rgba(74, 222, 128, 0.12);
+    --badge-success-text: #4ade80;
+    --badge-success-border: rgba(74, 222, 128, 0.25);
+
+    --badge-danger-bg: rgba(248, 113, 113, 0.12);
+    --badge-danger-text: #f87171;
+    --badge-danger-border: rgba(248, 113, 113, 0.25);
+
+    --badge-warning-bg: rgba(251, 191, 36, 0.12);
+    --badge-warning-text: #fbbf24;
+    --badge-warning-border: rgba(251, 191, 36, 0.25);
+
+    --badge-info-bg: rgba(96, 165, 250, 0.12);
+    --badge-info-text: #60a5fa;
+    --badge-info-border: rgba(96, 165, 250, 0.25);
+
+    /* --- Couleurs de Mouvements de Stock (dark) --- */
+    --mouvement-entree-bg: rgba(74, 222, 128, 0.12);
+    --mouvement-entree-text: #4ade80;
+    --mouvement-entree-border: rgba(74, 222, 128, 0.3);
+
+    --mouvement-sortie-bg: rgba(248, 113, 113, 0.12);
+    --mouvement-sortie-text: #f87171;
+    --mouvement-sortie-border: rgba(248, 113, 113, 0.3);
+
+    --mouvement-transfert-bg: rgba(96, 165, 250, 0.12);
+    --mouvement-transfert-text: #60a5fa;
+    --mouvement-transfert-border: rgba(96, 165, 250, 0.3);
+
+    --mouvement-ajustement-bg: rgba(251, 191, 36, 0.12);
+    --mouvement-ajustement-text: #fbbf24;
+    --mouvement-ajustement-border: rgba(251, 191, 36, 0.3);
+
+    /* --- Alertes de Stock (dark) --- */
+    --stock-normal-color: #4ade80;
+    --stock-faible-color: #fbbf24;
+    --stock-epuise-color: #f87171;
+
+    /* --- Couleurs de statut génériques (dark) --- */
+    --color-success: #4ade80;
+    --color-danger: #f87171;
+    --color-warning: #fbbf24;
+    --color-info: #60a5fa;
+
+    /* --- Ombres (dark) --- */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+
+    /* --- Divers (dark) --- */
+    --toast-progress-bg: rgba(255, 255, 255, 0.08);
+    --scrollbar-thumb: #475569;
+
+    color-scheme: dark;
+}
+
+
+/* ================================================================
+   TRANSITIONS GLOBALES — Passage doux entre thèmes
+   ================================================================ */
+body,
+header,
+footer,
+aside,
+main,
+nav,
+.premium-card,
+.st-card,
+.data-table-wrapper,
+.stat-card,
+.notification-dropdown,
+.toast-item,
+input,
+select,
+textarea,
+.dropdown-menu,
+.form-control,
+.form-select,
+.card,
+.modal-content {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+
+/* ================================================================
+   APPLICATION DES VARIABLES — Styles de base
+   ================================================================ */
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+
+/* ================================================================
+   BOUTON TOGGLE THÈME
+   ================================================================ */
+.theme-toggle-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle-btn .theme-icon {
+    font-size: 16px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+}
+
+.theme-toggle-btn:hover .theme-icon {
+    transform: rotate(25deg);
+}
+
+/* Animation de rotation au changement */
+@keyframes themeSwitch {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(0.7); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.theme-switching .theme-icon {
+    animation: themeSwitch 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ================================================================
+   CLASSES UTILITAIRES POUR MOUVEMENTS DE STOCK
+   ================================================================ */
+
+/* Badge de mouvement — Entrée */
+.mouvement-entree {
+    background: var(--mouvement-entree-bg);
+    color: var(--mouvement-entree-text);
+    border: 1px solid var(--mouvement-entree-border);
+}
+
+/* Badge de mouvement — Sortie */
+.mouvement-sortie {
+    background: var(--mouvement-sortie-bg);
+    color: var(--mouvement-sortie-text);
+    border: 1px solid var(--mouvement-sortie-border);
+}
+
+/* Badge de mouvement — Transfert */
+.mouvement-transfert {
+    background: var(--mouvement-transfert-bg);
+    color: var(--mouvement-transfert-text);
+    border: 1px solid var(--mouvement-transfert-border);
+}
+
+/* Badge de mouvement — Ajustement */
+.mouvement-ajustement {
+    background: var(--mouvement-ajustement-bg);
+    color: var(--mouvement-ajustement-text);
+    border: 1px solid var(--mouvement-ajustement-border);
+}
+
+/* Classe générique pour les badges de mouvement */
+.mouvement-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+
+/* ================================================================
+   INDICATEURS DE NIVEAU DE STOCK
+   ================================================================ */
+.stock-normal { color: var(--stock-normal-color); }
+.stock-faible { color: var(--stock-faible-color); }
+.stock-epuise { color: var(--stock-epuise-color); }
+
+.stock-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.stock-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.stock-dot--normal  { background-color: var(--stock-normal-color); box-shadow: 0 0 6px var(--stock-normal-color); }
+.stock-dot--faible  { background-color: var(--stock-faible-color); box-shadow: 0 0 6px var(--stock-faible-color); }
+.stock-dot--epuise  { background-color: var(--stock-epuise-color); box-shadow: 0 0 6px var(--stock-epuise-color); }
+
+
+/* ================================================================
+   SURCHARGES BOOTSTRAP POUR DARK MODE
+   ================================================================ */
+.dark .bg-white,
+[data-theme="dark"] .bg-white { background-color: var(--bg-card) !important; }
+
+.dark .bg-light,
+[data-theme="dark"] .bg-light {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
+}
+
+.dark .text-dark,
+[data-theme="dark"] .text-dark { color: var(--text-primary) !important; }
+
+.dark .border,
+.dark .border-bottom,
+.dark .border-top,
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top { border-color: var(--border-color) !important; }
+
+.dark .card,
+[data-theme="dark"] .card {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.dark .form-control,
+.dark .form-select,
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--input-border);
+}
+
+.dark .modal-content,
+[data-theme="dark"] .modal-content {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dark .dropdown-menu,
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.dark .dropdown-item,
+[data-theme="dark"] .dropdown-item {
+    color: var(--text-primary);
+}
+
+.dark .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--table-row-hover);
+}
+
+.dark .table,
+[data-theme="dark"] .table {
+    color: var(--text-primary);
+}
+
+.dark .list-group-item,
+[data-theme="dark"] .list-group-item {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.dark .text-muted,
+[data-theme="dark"] .text-muted {
+    color: var(--text-secondary) !important;
+}

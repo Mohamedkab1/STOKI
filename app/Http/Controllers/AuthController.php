@@ -21,6 +21,7 @@ class AuthController extends Controller
     /**
      * Traiter la connexion
      */
+    // app/Http/Controllers/AuthController.php
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -28,13 +29,17 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        // Ajouter des logs pour debug
+        \Log::info('Tentative de connexion', ['email' => $request->email]);
+
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            
-            return redirect()->intended('/')
-                ->with('success', 'Bienvenue ' . Auth::user()->name . ' !');
+            \Log::info('Connexion réussie', ['user_id' => Auth::id()]);
+            return redirect()->intended('/');
         }
 
+        \Log::warning('Échec connexion', ['email' => $request->email]);
+        
         return back()->withErrors([
             'email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.',
         ])->onlyInput('email');

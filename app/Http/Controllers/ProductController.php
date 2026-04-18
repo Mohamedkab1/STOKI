@@ -11,35 +11,54 @@ use App\Models\ProductBatch;
 use App\Services\FIFOService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;  // ← AJOUTEZ CECI
-use App\Notifications\LowStockNotification;    // ← AJOUTEZ CECI
-use App\Notifications\StockMovementNotification; // ← AJOUTEZ CECI
-use App\Notifications\InvoiceGeneratedNotification; // ← AJOUTEZ CECI
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\StockMovementNotification;
+use App\Notifications\InvoiceGeneratedNotification;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 
 class ProductController extends Controller
 {
     protected $fifoService;
+    protected $stockService;
 
-    public function __construct(FIFOService $fifoService)
+    public function __construct(FIFOService $fifoService, \App\Services\StockService $stockService)
     {
         $this->fifoService = $fifoService;
+        $this->stockService = $stockService;
     }
 
     /**
      * Afficher la liste des produits
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')
-            ->orderBy('name')
-            ->paginate(10);
-        
-        return view('products.index', compact('products'));
+        $query = Product::with('category');
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('sku', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->filled('stock') && $request->stock == 'low') {
+            $query->whereRaw('quantity <= min_stock');
+        }
+
+        $products = $query->orderBy('name')->paginate(12);
+        $categories = Category::orderBy('name')->get();
+
+        return view('products.index', compact('products', 'categories'));
     }
 
     /**
-     * Afficher le formulaire de création d'un produit
+     * Afficher le formulaire de création
      */
     public function create()
     {
@@ -48,7 +67,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Enregistrer un nouveau produit
+     * Enregistrer un produit
      */
     public function store(Request $request)
     {
@@ -57,31 +76,41 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'min_stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Validation de l'image
-
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-            // Gestion de l'upload d'image
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
+            $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($validated);
+        $initialQuantity = $validated['quantity'];
+        $validated['quantity'] = 0;
 
-        return redirect()->route('products.index')
-            ->with('success', 'Produit créé avec succès.');
+        $product = Product::create($validated);
+
+        // Si quantité initiale > 0, créer un lot initial via le service (qui incrémentera le stock une seule fois)
+        if ($initialQuantity > 0) {
+            $this->fifoService->recordPurchase($product, $initialQuantity, $product->price, [
+                'reason' => 'Stock initial',
+                'supplier' => 'Stock Initial'
+            ]);
+        }
+
+        return redirect()->route('products.index')->with('success', 'Produit créé avec succès.');
     }
 
     /**
-     * Afficher les détails d'un produit
+     * Afficher les détails
      */
     public function show(Product $product)
     {
         $movements = $product->stockMovements()
-            ->with(['batch', 'invoice'])
+            ->with(['invoice'])
             ->latest()
             ->paginate(10);
         
@@ -89,7 +118,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Afficher le formulaire d'édition d'un produit
+     * Éditer un produit
      */
     public function edit(Product $product)
     {
@@ -107,25 +136,21 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
             'min_stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Validation de l'image
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Gestion de l'upload d'image
         if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
+            if ($product->image) Storage::disk('public')->delete($product->image);
+            $validated['image'] = $request->file('image')->store('products', 'public');
         }
 
         $product->update($validated);
 
-        return redirect()->route('products.index')
-            ->with('success', 'Produit mis à jour avec succès.');
+        return redirect()->route('products.index')->with('success', 'Produit mis à jour.');
     }
 
     /**
@@ -133,216 +158,110 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
-        
+        if ($product->image) Storage::disk('public')->delete($product->image);
         $product->delete();
-
-        return redirect()->route('products.index')
-            ->with('success', 'Produit supprimé avec succès.');
+        return redirect()->route('products.index')->with('success', 'Produit supprimé.');
     }
 
-    /**
-     * Ajuster le stock avec FIFO
-     */
     public function adjustStock(Request $request, Product $product)
     {
+        $validated = $request->validate([
+            'type'              => 'required|in:in,out,adjustment',
+            'quantity'          => 'required|integer|min:1',
+            'unit_price'        => 'nullable|numeric|min:0',
+            'selling_price'     => 'nullable|numeric|min:0',
+            'reason'            => 'nullable|string',
+            'customer_supplier' => 'nullable|string|max:255',
+            'payment_method'    => 'nullable|string'
+        ]);
+
         try {
-            // Validation
-            $validated = $request->validate([
-                'type' => 'required|in:in,out',
-                'quantity' => 'required|integer|min:1',
-                'reason' => 'nullable|string',
-                'customer_supplier' => 'required|string|max:255',
-                'payment_method' => 'required|string'
-            ]);
-
-            // Vérifier le stock pour une sortie
-            if ($validated['type'] === 'out' && $product->quantity < $validated['quantity']) {
-                return back()->with('error', 'Stock insuffisant. Disponible: ' . $product->quantity);
-            }
-
             DB::beginTransaction();
 
-            // 1. Créer le mouvement de stock
-            $movement = StockMovement::create([
-                'product_id' => $product->id,
-                'type' => $validated['type'],
-                'quantity' => $validated['quantity'],
-                'unit_price' => $product->price,
-                'total_price' => $validated['quantity'] * $product->price,
-                'reason' => $validated['reason'] ?? null
-            ]);
+            // Définir le prix unitaire selon le type d'opération
+            $priceUsed = match($validated['type']) {
+                'in'         => floatval($validated['unit_price'] ?? $product->purchase_price ?? 0),
+                'out'        => floatval($validated['selling_price'] ?? $product->price ?? 0),
+                'adjustment' => floatval($validated['unit_price'] ?? $product->purchase_price ?? 0),
+                default      => 0
+            };
 
-            // 2. Mettre à jour le stock
-            if ($validated['type'] === 'in') {
-                $product->increment('quantity', $validated['quantity']);
-                $invoiceType = 'purchase';
-            } else {
-                $product->decrement('quantity', $validated['quantity']);
-                $invoiceType = 'sale';
+            $invoiceType = $validated['type'] === 'in' ? 'purchase' : 'sale';
+            $note = $validated['reason'] ?? match($validated['type']) {
+                'in'         => 'Achat',
+                'out'        => 'Vente',
+                'adjustment' => 'Ajustement de stock',
+                default      => 'Mouvement'
+            };
+
+            // 1. Enregistrer le mouvement via le StockService (gère l'update du stock)
+            $movement = $this->stockService->recordMovement(
+                $product,
+                $validated['type'],
+                $validated['quantity'],
+                $note
+            );
+
+            $calculatedTotal = $validated['quantity'] * $priceUsed;
+
+            // 2. Créer la facture (uniquement pour achat/vente, pas pour l'ajustement)
+            $invoice = null;
+            if (in_array($validated['type'], ['in', 'out'])) {
+                $invoiceNumber = Invoice::generateInvoiceNumber($invoiceType);
+
+                $invoice = Invoice::create([
+                    'invoice_number'    => $invoiceNumber,
+                    'type'              => $invoiceType,
+                    'movement_type'     => $validated['type'],
+                    'product_id'        => $product->id,
+                    'quantity'          => $validated['quantity'],
+                    'unit_price'        => $priceUsed,
+                    'total_amount'      => $calculatedTotal,
+                    'reason'            => $note,
+                    'customer_supplier' => $validated['customer_supplier'] ?? 'N/A',
+                    'payment_method'    => $validated['payment_method'] ?? 'Espèces',
+                    'payment_status'    => 'paid',
+                    'invoice_date'      => now()
+                ]);
+
+                // 3. Lier la facture au mouvement
+                $movement->update([
+                    'invoice_id'  => $invoice->id,
+                    'unit_price'  => $priceUsed,
+                    'total_price' => $calculatedTotal
+                ]);
             }
-
-            // 3. Créer la facture
-            $invoice = Invoice::create([
-                'invoice_number' => 'FACT-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
-                'type' => $invoiceType,
-                'movement_type' => $validated['type'],
-                'product_id' => $product->id,
-                'quantity' => $validated['quantity'],
-                'unit_price' => $product->price,
-                'total_amount' => $validated['quantity'] * $product->price,
-                'reason' => $validated['reason'] ?? ($validated['type'] === 'in' ? 'Achat' : 'Vente'),
-                'customer_supplier' => $validated['customer_supplier'],
-                'payment_method' => $validated['payment_method'],
-                'payment_status' => 'paid',
-                'invoice_date' => now()
-            ]);
-
-            // 4. Lier la facture au mouvement
-            $movement->update(['invoice_id' => $invoice->id]);
 
             DB::commit();
 
-            // ========== NOTIFICATIONS UNIQUEMENT ==========
-            $user = auth()->user();
-            if ($user) {
-                // Notification de mouvement de stock
-                $user->notify(new StockMovementNotification($movement, $product));
-                
-                // Notification de facture générée
-                $user->notify(new InvoiceGeneratedNotification($invoice));
-                
-                // Notification de stock faible (sans message flash)
-                if ($product->isLowStock()) {
-                    $user->notify(new LowStockNotification($product));
-                    // PAS DE SESSION flash ici - juste la notification
-                }
-        }
-        // =============================================
+            $stockActuel = $product->fresh()->quantity;
+            $successMsg  = "Opération enregistrée avec succès ! Stock actuel : {$stockActuel} unités.";
 
-            return redirect()->route('invoices.show', $invoice)
-                ->with('success', 'Opération effectuée avec succès !');
+            if ($invoice) {
+                return redirect()->route('invoices.show', $invoice)->with('success', $successMsg);
+            }
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->validator)->withInput();
+            return redirect()->route('products.show', $product)->with('success', $successMsg);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Erreur adjustStock: ' . $e->getMessage());
-            return back()->with('error', 'Erreur: ' . $e->getMessage())->withInput();
+            \Log::error('Erreur adjustStock: ' . $e->getMessage(), [
+                'product_id' => $product->id,
+                'request'    => $request->all()
+            ]);
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Afficher l'historique FIFO d'un produit
-     */
+    public function recalculateStock(Product $product)
+    {
+        $product->getCurrentStock();
+        return response()->json(['success' => true, 'stock' => $product->quantity]);
+    }
+
     public function fifoHistory(Product $product)
     {
-        // Récupérer tous les mouvements FIFO avec les lots
-        $movements = StockMovement::with(['batch', 'invoice'])
-            ->where('product_id', $product->id)
-            ->orderBy('created_at', 'asc')
-            ->get();
-        
-        // Calculer l'historique FIFO
-        $fifoHistory = $this->calculateFIFOHistory($product, $movements);
-        
-        return view('products.fifo-history', compact('product', 'fifoHistory'));
-    }
-
-    /**
-     * Calculer l'historique FIFO
-     */
-    private function calculateFIFOHistory($product, $movements)
-    {
-        $history = [];
-        $batches = []; // Pour suivre les lots en stock
-        
-        foreach ($movements as $movement) {
-            $entry = [
-                'date' => $movement->created_at->format('d-m-Y'),
-                'type' => $movement->type,
-                'quantity' => $movement->quantity,
-                'unit_price' => $movement->unit_price,
-                'total_value' => $movement->total_price,
-                'batch_number' => $movement->batch?->batch_number ?? '-',
-                'stock_after' => null,
-                'stock_value_after' => null,
-                'details' => []
-            ];
-            
-            if ($movement->type === 'in') {
-                // Entrée de stock
-                $entry['stock_after'] = $product->quantity; // À améliorer
-                
-                // Ajouter le lot au stock
-                if ($movement->batch) {
-                    $batches[] = [
-                        'batch_id' => $movement->batch->id,
-                        'batch_number' => $movement->batch->batch_number,
-                        'quantity' => $movement->batch->remaining_quantity,
-                        'unit_price' => $movement->batch->purchase_price,
-                        'received_date' => $movement->batch->received_date
-                    ];
-                }
-                
-                // Calculer la valeur totale du stock après cette entrée
-                $entry['stock_value_after'] = $this->calculateStockValue($batches);
-                
-            } else {
-                // Sortie de stock - Détail FIFO
-                $entry['details'] = $this->getSaleDetails($movement);
-                $entry['stock_after'] = $product->quantity;
-                $entry['stock_value_after'] = $this->calculateStockValue($batches);
-            }
-            
-            $history[] = $entry;
-        }
-        
-        return $history;
-    }
-
-    /**
-     * Calculer la valeur totale du stock
-     */
-    private function calculateStockValue($batches)
-    {
-        $total = 0;
-        foreach ($batches as $batch) {
-            $total += ($batch['quantity'] ?? 0) * ($batch['unit_price'] ?? 0);
-        }
-        return $total;
-    }
-
-    /**
-     * Obtenir les détails d'une vente
-     */
-    private function getSaleDetails($movement)
-    {
-        // Cette méthode devrait retourner les détails des lots utilisés pour cette vente
-        // À implémenter selon votre structure de données
-        return [];
-    }
-
-    /**
-     * Afficher la valorisation du stock (FIFO)
-     */
-    public function valuation(Product $product)
-    {
-        $valuation = $this->fifoService->getStockValuation($product);
-        return view('products.valuation', compact('valuation'));
-    }
-
-    /**
-     * Afficher les lots d'un produit
-     */
-    public function batches(Product $product)
-    {
-        $batches = ProductBatch::where('product_id', $product->id)
-            ->orderBy('received_date', 'desc')
-            ->paginate(20);
-        
-        return view('products.batches', compact('product', 'batches'));
+        // ... gardé si nécessaire ou supprimé car inclus dans show
+        return view('products.fifo-history', compact('product'));
     }
 }

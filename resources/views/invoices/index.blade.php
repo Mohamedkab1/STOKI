@@ -1,265 +1,139 @@
-<!-- resources/views/invoices/index.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Factures')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-5" data-aos="fade-down">
-    <div>
-        <h1 class="text-gradient mb-2">
-            <i class="fas fa-file-invoice me-2"></i>
-            Factures
-        </h1>
-        <p class="text-white-50">Gérez toutes vos factures</p>
-    </div>
-    <a href="{{ route('invoices.create') }}" class="btn-premium">
-        <i class="fas fa-plus me-2"></i> Nouvelle Facture
-    </a>
-</div>
+<div class="space-y-8 animate-in">
 
-<!-- Filtres -->
-<div class="premium-card mb-4" data-aos="fade-up">
-    <div class="card-header-premium">
-        <h5 class="mb-0">
-            <i class="fas fa-filter me-2"></i>
-            Filtres
-        </h5>
-    </div>
-    <div class="card-body">
-        <form method="GET" action="{{ route('invoices.index') }}" class="row g-3">
-            <div class="col-md-3">
-                <select name="type" class="form-control bg-dark text-white border-0">
-                    <option value="">Tous les types</option>
-                    <option value="purchase" {{ request('type') == 'purchase' ? 'selected' : '' }}>Achat</option>
-                    <option value="sale" {{ request('type') == 'sale' ? 'selected' : '' }}>Vente</option>
-                </select>
-            </div>
-            
-            <div class="col-md-3">
-                <select name="payment_status" class="form-control bg-dark text-white border-0">
-                    <option value="">Tous les statuts</option>
-                    <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Payé</option>
-                    <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>En attente</option>
-                    <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>Annulé</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
-                <input type="date" name="date_from" class="form-control bg-dark text-white border-0" 
-                       value="{{ request('date_from') }}" placeholder="Date de">
-            </div>
-            
-            <div class="col-md-2">
-                <input type="date" name="date_to" class="form-control bg-dark text-white border-0" 
-                       value="{{ request('date_to') }}" placeholder="Date à">
-            </div>
-            
-            <div class="col-md-2">
-                <button type="submit" class="btn-premium w-100">
-                    <i class="fas fa-search me-2"></i> Filtrer
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+  <!-- Header -->
+  <div class="page-header">
+      <div>
+          <h1 class="page-title">Factures</h1>
+          <p class="text-text-muted mt-1 font-medium italic opacity-80">Historique complet de vos transactions.</p>
+      </div>
+      <x-ui.button href="{{ route('products.index') }}" tag="a" size="sm" icon="fas fa-plus shadow-sm">
+          Nouvelle facture
+      </x-ui.button>
+  </div>
 
-<!-- Statistiques des factures -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
-        <div class="stat-card-premium">
-            <div class="stat-icon-premium">
-                <i class="fas fa-file-invoice"></i>
-            </div>
-            <div class="stat-value">{{ $invoices->total() }}</div>
-            <div class="stat-label">Total factures</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
-        <div class="stat-card-premium">
-            <div class="stat-icon-premium">
-                <i class="fas fa-shopping-cart"></i>
-            </div>
-            @php
-                $totalAchats = $invoices->where('type', 'purchase')->sum('total_amount');
-            @endphp
-            <div class="stat-value">{{ number_format($totalAchats, 0) }} €</div>
-            <div class="stat-label">Total achats</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
-        <div class="stat-card-premium">
-            <div class="stat-icon-premium">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            @php
-                $totalVentes = $invoices->where('type', 'sale')->sum('total_amount');
-            @endphp
-            <div class="stat-value">{{ number_format($totalVentes, 0) }} €</div>
-            <div class="stat-label">Total ventes</div>
-        </div>
-    </div>
-    
-    <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
-        <div class="stat-card-premium">
-            <div class="stat-icon-premium">
-                <i class="fas fa-clock"></i>
-            </div>
-            @php
-                $enAttente = $invoices->where('payment_status', 'pending')->count();
-            @endphp
-            <div class="stat-value">{{ $enAttente }}</div>
-            <div class="stat-label">En attente</div>
-        </div>
-    </div>
-</div>
+  <!-- Stats mini row -->
+  <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="stat-card">
+          <div class="stat-icon stat-icon-blue">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div>
+              <div class="stat-label">Total factures</div>
+              <div class="stat-value">{{ $invoices->total() }}</div>
+          </div>
+      </div>
+      <div class="stat-card">
+          <div class="stat-icon stat-icon-green">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div>
+              <div class="stat-label">Montant total (Payé)</div>
+              <div class="stat-value">{{ number_format(\App\Models\Invoice::where('payment_status', 'paid')->sum('total_amount'), 2) }} <span class="text-xs text-text-secondary">MAD</span></div>
+          </div>
+      </div>
+      <div class="stat-card">
+          <div class="stat-icon stat-icon-orange">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div>
+              <div class="stat-label">En attente</div>
+              <div class="stat-value">{{ \App\Models\Invoice::where('payment_status', 'pending')->count() }}</div>
+          </div>
+      </div>
+  </div>
 
-<!-- Liste des factures -->
-<div class="premium-card" data-aos="fade-up">
-    <div class="card-header-premium d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>
-            Liste des factures
-        </h5>
-        <span class="badge" style="background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%);">
-            {{ $invoices->total() }} facture(s)
-        </span>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-dark table-hover">
-                <thead>
-                    <tr>
-                        <th>N° Facture</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Montant</th>
-                        <th>Client/Fournisseur</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($invoices as $invoice)
-                    <tr>
-                        <td class="fw-bold">
-                            <span style="color: #4285f4;">{{ $invoice->invoice_number }}</span>
-                        </td>
-                        <td>{{ $invoice->invoice_date->format('d/m/Y H:i') }}</td>
-                        <td>
-                            @if($invoice->type == 'purchase')
-                                <span class="badge" style="background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%);">Achat</span>
-                            @else
-                                <span class="badge" style="background: linear-gradient(135deg, #BC4639 0%, #5C2018 100%);">Vente</span>
-                            @endif
-                        </td>
-                        <td>{{ $invoice->product->name }}</td>
-                        <td>{{ $invoice->quantity }}</td>
-                        <td class="fw-bold" style="color: #4285f4;">{{ number_format($invoice->total_amount, 2) }} €</td>
-                        <td>{{ $invoice->customer_supplier ?? '-' }}</td>
-                        <td>
-                            @if($invoice->payment_status == 'paid')
-                                <span class="badge" style="background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%);">Payé</span>
-                            @elseif($invoice->payment_status == 'pending')
-                                <span class="badge" style="background: linear-gradient(135deg, #BC4639 0%, #5C2018 100%);">En attente</span>
-                            @else
-                                <span class="badge" style="background: #5C2018;">Annulé</span>
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('invoices.show', $invoice) }}" 
-                               class="btn-premium btn-sm me-1"
-                               data-bs-toggle="tooltip" title="Voir">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{{ route('invoices.pdf', $invoice) }}" 
-                               class="btn-premium btn-sm me-1"
-                               data-bs-toggle="tooltip" title="Télécharger PDF">
-                                <i class="fas fa-file-pdf"></i>
-                            </a>
-                            @if($invoice->payment_status == 'pending')
-                            <form action="{{ route('invoices.update-payment-status', $invoice) }}" 
-                                  method="POST" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="payment_status" value="paid">
-                                <button type="submit" class="btn-premium btn-sm"
-                                        data-bs-toggle="tooltip" title="Marquer comme payé">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </form>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="text-center py-5">
-                            <i class="fas fa-file-invoice fa-3x mb-3" style="color: #D4A59A;"></i>
-                            <p class="text-white-50">Aucune facture trouvée</p>
-                            <a href="{{ route('invoices.create') }}" class="btn-premium btn-sm">
-                                <i class="fas fa-plus me-2"></i>Créer une facture
-                            </a>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Pagination stylisée -->
-        <div class="d-flex justify-content-center mt-4">
-            @if ($invoices->hasPages())
-                <nav aria-label="Pagination">
-                    <ul class="pagination-custom">
-                        {{-- Page précédente --}}
-                        @if ($invoices->onFirstPage())
-                            <li class="page-item disabled">
-                                <span class="page-link">
-                                    <i class="fas fa-chevron-left"></i>
-                                </span>
-                            </li>
-                        @else
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $invoices->previousPageUrl() }}">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                        @endif
+  <!-- Filters -->
+  <form action="{{ route('invoices.index') }}" method="GET" class="filters-bar">
+      <div class="filter-search" style="min-width: 250px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" name="search" placeholder="N° facture ou client..." value="{{ request('search') }}">
+      </div>
+      
+      <select name="payment_status" class="filter-select">
+          <option value="">Tous les statuts</option>
+          <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Payée</option>
+          <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>En attente</option>
+      </select>
+      
+      <div style="display:flex; align-items:center; gap:6px;">
+          <input type="date" name="date_from" value="{{ request('date_from') }}" class="filter-select" style="min-width: 130px;">
+          <span class="text-text-secondary">-</span>
+          <input type="date" name="date_to" value="{{ request('date_to') }}" class="filter-select" style="min-width: 130px;">
+      </div>
 
-                        {{-- Numéros de page --}}
-                        @foreach ($invoices->getUrlRange(1, $invoices->lastPage()) as $page => $url)
-                            @if ($page == $invoices->currentPage())
-                                <li class="page-item active">
-                                    <span class="page-link">{{ $page }}</span>
-                                </li>
-                            @else
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                                </li>
-                            @endif
-                        @endforeach
+      <button type="submit" class="btn-filter">Filtrer</button>
+      <a href="{{ route('invoices.index') }}" class="btn-reset" title="Réinitialiser">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+      </a>
+  </form>
 
-                        {{-- Page suivante --}}
-                        @if ($invoices->hasMorePages())
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $invoices->nextPageUrl() }}">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        @else
-                            <li class="page-item disabled">
-                                <span class="page-link">
-                                    <i class="fas fa-chevron-right"></i>
-                                </span>
-                            </li>
-                        @endif
-                    </ul>
-                </nav>
-            @endif
-        </div>
-    </div>
+  <!-- Table -->
+  <div class="table-responsive">
+      <table class="modern-table">
+          <thead>
+              <tr>
+                  <th>Numéro</th>
+                  <th>Nature</th>
+                  <th>Client / Fournisseur</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                  <th width="100">Actions</th>
+              </tr>
+          </thead>
+          <tbody>
+              @forelse($invoices as $inv)
+                  <tr>
+                      <td class="font-medium text-text-primary">#{{ $inv->invoice_number }}</td>
+                      <td>
+                          @if($inv->type === 'sale')
+                            Sortie (Vente)
+                          @else
+                            Entrée (Achat)
+                          @endif
+                      </td>
+                      <td>{{ $inv->customer_supplier ?: '—' }}</td>
+                      <td class="font-medium">{{ number_format($inv->total_amount, 2) }} MAD</td>
+                      <td>
+                          @if($inv->payment_status === 'paid')
+                              <span class="stock-badge badge-success relative top-0 right-0">Payée</span>
+                          @else
+                              <span class="stock-badge badge-warning relative top-0 right-0">En attente</span>
+                          @endif
+                      </td>
+                      <td class="text-text-secondary">{{ $inv->invoice_date->format('d/m/Y') }}</td>
+                      <td>
+                          <div class="flex gap-1.5">
+                              <a href="{{ route('invoices.show', $inv) }}" class="act-btn act-view" title="Voir">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                              </a>
+                              <a href="{{ route('invoices.pdf', $inv) }}" class="act-btn" title="PDF">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-text-secondary" stroke="currentColor" stroke-width="2"><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"></path><path d="M18 18h.01"></path><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4"></path></svg>
+                              </a>
+                          </div>
+                      </td>
+                  </tr>
+              @empty
+                  <tr>
+                      <td colspan="7" class="text-center text-text-secondary py-10">
+                          Aucune facture trouvée.
+                      </td>
+                  </tr>
+              @endforelse
+          </tbody>
+      </table>
+  </div>
+
+  @if($invoices->hasPages())
+      <div class="pt-6">
+          {{ $invoices->links() }}
+      </div>
+  @endif
+
 </div>
 @endsection

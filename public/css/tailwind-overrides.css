@@ -1,0 +1,47 @@
+/*
+ * =================================================================
+ *  STOKI ERP — Tailwind CSS Overrides & Conflictx Fixes
+ *  Fichier : public/css/tailwind-overrides.css
+ * =================================================================
+ */
+
+/* Empêcher overflow horizontal global */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Fix Tailwind container */
+.container {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Fix images qui débordent */
+img, svg, video, canvas, audio, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Fix inputs Tailwind + custom */
+input, select, textarea {
+  max-width: 100%;
+}
+
+/* Fix flex et grid children qui débordent */
+.min-w-0 { 
+    min-width: 0; 
+}
+* {
+    min-width: 0; 
+    /* Cette propriété aide dans les grilles/flex Tailwind mais peut casser certaines choses.
+       On l'applique subtilement sur les conteneurs flex internes via min-w-0 si besoin. */
+}
+
+/* Correction utilitaire flex min-width (souvent source de texte qui sort) */
+.flex > * {
+  min-width: 0;
+}

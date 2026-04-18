@@ -37,7 +37,7 @@
             <div class="p-3 rounded" style="background: rgba(0,0,0,0.2);">
                 <small class="text-white-50 d-block">Prix unitaire</small>
                 <span class="fw-bold text-white">{{ number_format($data['unit_price'], 2) }}</span>
-                <small class="text-white-50">€</small>
+                <small class="text-white-50">DH</small>
             </div>
         </div>
         @endif
@@ -47,7 +47,7 @@
             <div class="p-3 rounded" style="background: rgba(0,0,0,0.2);">
                 <small class="text-white-50 d-block">Total</small>
                 <span class="fw-bold" style="color: #4285f4;">{{ number_format($data['total_price'], 2) }}</span>
-                <small class="text-white-50">€</small>
+                <small class="text-white-50">DH</small>
             </div>
         </div>
         @endif

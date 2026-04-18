@@ -154,21 +154,21 @@
                     <tr>
                         <td>{{ $item->product->name }}</td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->unit_price, 2) }} €</td>
-                        <td>{{ number_format($item->subtotal, 2) }} €</td>
+                        <td>{{ number_format($item->unit_price, 2) }} DH</td>
+                        <td>{{ number_format($item->subtotal, 2) }} DH</td>
                     </tr>
                     @endforeach
                 @else
                     <tr>
                         <td>{{ $invoice->product->name }}</td>
                         <td>{{ $invoice->quantity }}</td>
-                        <td>{{ number_format($invoice->unit_price, 2) }} €</td>
-                        <td>{{ number_format($invoice->total_amount, 2) }} €</td>
+                        <td>{{ number_format($invoice->unit_price, 2) }} DH</td>
+                        <td>{{ number_format($invoice->total_amount, 2) }} DH</td>
                     </tr>
                 @endif
                 <tr class="total-row">
                     <td colspan="3" style="text-align: right;"><strong>TOTAL :</strong></td>
-                    <td><strong>{{ number_format($invoice->total_amount, 2) }} €</strong></td>
+                    <td><strong>{{ number_format($invoice->total_amount, 2) }} DH</strong></td>
                 </tr>
             </tbody>
         </table>

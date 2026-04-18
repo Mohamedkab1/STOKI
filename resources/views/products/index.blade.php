@@ -1,176 +1,121 @@
-<!-- resources/views/products/index.blade.php -->
 @extends('layouts.app')
 
-@section('title', 'Produits')
+@section('title', 'Catalogue Produits')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-5" data-aos="fade-down">
-    <div>
-        <h1 class="text-gradient mb-2">
-            <i class="fas fa-box me-2"></i>
-            Catalogue Produits
-        </h1>
-        <p class="text-white-50">Gérez votre inventaire de produits</p>
+<div class="space-y-8 animate-in">
+
+  <!-- Header Section -->
+  <div class="page-header">
+      <div>
+          <h1 class="page-title">Catalogue Produits</h1>
+          <p class="text-text-muted mt-1 font-medium italic opacity-80">Gérez votre inventaire et vos ventes en temps réel.</p>
+      </div>
+      <x-ui.button href="{{ route('products.create') }}" tag="a" size="sm" icon="fas fa-plus shadow-sm">
+          Nouveau Produit
+      </x-ui.button>
+  </div>
+
+  {{-- New Filter Section (inline) --}}
+  <form action="{{ route('products.index') }}" method="GET" class="filters-bar">
+    <div class="filter-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" name="search" placeholder="Recherche par nom, SKU..." value="{{ request('search') }}">
     </div>
-    <a href="{{ route('products.create') }}" class="btn-premium">
-        <i class="fas fa-plus me-2"></i> Nouveau Produit
+
+    <select name="category" class="filter-select">
+      <option value="">Toutes les catégories</option>
+      @foreach($categories as $cat)
+        <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
+          {{ $cat->name }}
+        </option>
+      @endforeach
+    </select>
+
+    <button type="submit" class="btn-filter">Filtrer</button>
+
+    <a href="{{ route('products.index') }}" class="btn-reset" title="Réinitialiser">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+        <path d="M3 3v5h5"></path>
+      </svg>
     </a>
-</div>
+  </form>
 
-<!-- Barre de recherche -->
-<div class="premium-card mb-4" data-aos="fade-up">
-    <div class="card-body">
-        <form method="GET" action="{{ route('products.index') }}" class="row g-3">
-            <div class="col-md-4">
-                <input type="text" name="search" class="form-control bg-dark text-white border-0" 
-                       placeholder="Rechercher un produit..." value="{{ request('search') }}">
-            </div>
-            <div class="col-md-3">
-                <select name="category" class="form-control bg-dark text-white border-0">
-                    <option value="">Toutes catégories</option>
-                    @foreach(App\Models\Category::all() as $category)
-                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn-premium w-100">
-                    <i class="fas fa-search me-2"></i> Filtrer
-                </button>
-            </div>
-            <div class="col-md-2">
-                <a href="{{ route('products.index') }}" class="btn-premium w-100">
-                    <i class="fas fa-redo me-2"></i> Réinitialiser
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Grille des produits -->
-<div class="row g-4">
+  {{-- Products Grid --}}
+  <div class="products-grid">
     @forelse($products as $product)
-        <div class="col-xl-3 col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 50 }}">
-            <div class="product-card-premium">
-                <div class="product-image-premium">
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
-                    @else
-                        <div class="text-center">
-                            <i class="fas fa-box fa-4x text-gradient"></i>
-                            <p class="text-white-50 small mt-2">Aucune image</p>
-                        </div>
-                    @endif
-                    
-                    @if($product->isLowStock())
-                        <span class="product-badge-premium">
-                            <i class="fas fa-exclamation-triangle me-1"></i>Stock faible
-                        </span>
-                    @elseif($product->quantity == 0)
-                        <span class="product-badge-premium bg-danger">Rupture</span>
-                    @else
-                        <span class="product-badge-premium" style="background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%);">En stock</span>
-                    @endif
-                </div>
-                
-                <div class="product-info-premium">
-                    <h6 class="product-title-premium">{{ $product->name }}</h6>
-                    <p class="product-sku-premium">
-                        <i class="fas fa-barcode me-1"></i> {{ $product->sku }}
-                    </p>
-                    
-                    <div class="product-price-premium">
-                        {{ number_format($product->price, 2) }} €
-                    </div>
-                    
-                    <div class="product-stock mb-3">
-                        <span class="text-white-50">
-                            <i class="fas fa-cubes me-1"></i>Stock
-                        </span>
-                        <span class="fw-bold {{ $product->isLowStock() ? 'text-danger' : 'text-gradient' }}">
-                            {{ $product->quantity }} unités
-                        </span>
-                    </div>
-                    
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('products.show', $product) }}" 
-                           class="btn-premium flex-grow-1"
-                           data-bs-toggle="tooltip" title="Voir détails">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{{ route('products.edit', $product) }}" 
-                           class="btn-premium"
-                           data-bs-toggle="tooltip" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-premium"
-                                    onclick="return confirm('Supprimer ce produit ?')"
-                                    data-bs-toggle="tooltip" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+      <div class="product-card">
+
+        {{-- Image zone compact --}}
+        <div class="product-card-img">
+          @if($product->image)
+            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+          @else
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="text-slate-300" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          @endif
+
+          {{-- Stock badge top-right --}}
+          <span class="stock-badge {{ $product->quantity > 0 ? 'badge-success' : 'badge-danger' }}">
+            Stock: {{ $product->quantity }}
+          </span>
         </div>
+
+        {{-- Body --}}
+        <div class="product-card-body">
+          <div class="product-card-top">
+            <span class="product-cat">{{ $product->category->name ?? '—' }}</span>
+            <span class="product-sku">#{{ $product->sku }}</span>
+          </div>
+
+          <h3 class="product-name" title="{{ $product->name }}">{{ $product->name }}</h3>
+          <p class="product-desc" title="{{ $product->description ?? 'Aucune description' }}">
+            {{ $product->description ?? '' }}
+          </p>
+
+          <div class="product-card-footer">
+            <div class="product-price">
+              {{ number_format($product->price, 2) }}
+              <span>MAD</span>
+            </div>
+            
+            <div class="product-actions">
+              <a href="{{ route('products.show', $product) }}" class="act-btn act-view" title="Voir">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </a>
+              <a href="{{ route('products.edit', $product) }}" class="act-btn act-edit" title="Modifier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
     @empty
-        <div class="col-12">
-            <div class="premium-card text-center p-5" data-aos="fade-up">
-                <i class="fas fa-box-open fa-4x text-gradient mb-3"></i>
-                <h4 class="text-white">Aucun produit trouvé</h4>
-                <p class="text-white-50 mb-4">Commencez par ajouter votre premier produit</p>
-                <a href="{{ route('products.create') }}" class="btn-premium">
-                    <i class="fas fa-plus me-2"></i> Ajouter un produit
-                </a>
-            </div>
-        </div>
+      <div class="products-empty">
+        Aucun produit trouvé.
+      </div>
     @endforelse
+  </div>
+
+  <!-- Pagination -->
+  @if($products->hasPages())
+    <div class="pt-8">
+        {{ $products->links() }}
+    </div>
+  @endif
+
 </div>
-
-<!-- Pagination -->
-<div class="d-flex justify-content-center mt-5">
-    {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
-</div>
-
-<style>
-.product-image-premium {
-    height: 200px;
-    background: linear-gradient(135deg, #5C2018 0%, #BC4639 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.product-image-premium img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-}
-
-.product-image-premium:hover img {
-    transform: scale(1.1);
-}
-
-.product-badge-premium {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 5px 15px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 1;
-    background: linear-gradient(135deg, #4285f4 0%, #5C2018 100%);
-    color: #F3E0DC;
-    box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
-}
-</style>
 @endsection

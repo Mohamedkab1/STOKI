@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
-    protected $table = 'stock_movements';
-    
+    const TYPE_IN = 'in';
+    const TYPE_OUT = 'out';
+    const TYPE_ADJUSTMENT = 'adjustment';
+
     protected $fillable = [
         'product_id',
-        'product_batch_id',
         'type',
         'quantity',
         'unit_price',
         'total_price',
         'reason',
-        'reference_type',
-        'reference_id',
+        'note',
         'invoice_id'
     ];
 

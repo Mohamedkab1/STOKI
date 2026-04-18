@@ -3,186 +3,210 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Contrôleur des Notifications
+ *
+ * Gère l'affichage, le filtrage par catégories, le marquage 
+ * comme lu et le comptage pour l'utilisateur authentifié.
+ */
 class NotificationController extends Controller
 {
-    // SUPPRIMEZ COMPLÈTEMENT LE CONSTRUCTEUR
-    // Pas de __construct() du tout
-
     /**
-     * Afficher toutes les notifications
+     * Récupérer les notifications récentes (toutes ou par défaut)
+     *
+     * @return JsonResponse
      */
-    public function index(Request $request)
+    public function index(): JsonResponse 
     {
-        // Vérification manuelle de l'authentification
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Vous devez être connecté.');
+            return response()->json(['notifications' => [], 'unread_count' => 0]);
         }
 
-        $user = Auth::user();
-        
-        $query = $user->notifications();
-        
-        // Filtre par type si présent
-        if ($request->filled('type')) {
-            $type = $request->type;
-            $query->where('type', 'like', '%' . $type . '%');
-        }
-        
-        $notifications = $query->paginate(15);
-        $unreadCount = $user->unreadNotifications->count();
-        
-        return view('notifications.index', compact('notifications', 'unreadCount'));
+        $notifications = Notification::forUser(Auth::id())
+            ->latest()
+            ->take(20)
+            ->get()
+            ->map(function ($notif) {
+                return $this->formatNotification($notif);
+            });
+
+        return response()->json([
+            'notifications' => $notifications,
+        ]);
     }
 
     /**
-     * Obtenir les dernières notifications pour le dropdown
+     * Compter le total de non-lues et par catégorie (JSON)
+     *
+     * @return JsonResponse
      */
-    public function getLatest()
+    public function unreadCount(): JsonResponse
     {
         if (!Auth::check()) {
-            return response()->json([
-                'notifications' => [],
-                'unread_count' => 0
-            ]);
+            return response()->json(['total' => 0, 'entree' => 0, 'sortie' => 0, 'alerte_stock' => 0, 'facture' => 0]);
         }
 
-        $user = Auth::user();
-        
-        $notifications = $user->notifications()
+        $userId = Auth::id();
+        $total = Notification::forUser($userId)->unread()->count();
+        $entree = Notification::forUser($userId)->where('category', 'entree')->unread()->count();
+        $sortie = Notification::forUser($userId)->where('category', 'sortie')->unread()->count();
+        $alerteStock = Notification::forUser($userId)->where('category', 'alerte_stock')->unread()->count();
+        $facture = Notification::forUser($userId)->where('category', 'facture')->unread()->count();
+
+        return response()->json([
+            'total'        => $total,
+            'entree'       => $entree,
+            'sortie'       => $sortie,
+            'alerte_stock' => $alerteStock,
+            'facture'      => $facture,
+        ]);
+    }
+
+    /**
+     * Obtenir les notifications par catégorie
+     *
+     * @param string $category
+     * @return JsonResponse
+     */
+    public function byCategory($category): JsonResponse
+    {
+        if (!Auth::check()) {
+            return response()->json(['notifications' => []]);
+        }
+
+        $notifications = Notification::forUser(Auth::id())
+            ->where('category', $category)
             ->latest()
-            ->limit(5)
+            ->take(15)
             ->get()
-            ->map(function ($notification) {
-                $data = $notification->data;
-                return [
-                    'id' => $notification->id,
-                    'data' => [
-                        'message' => $data['message'] ?? 'Nouvelle notification',
-                        'icon' => $data['icon'] ?? 'bell',
-                        'color' => $data['color'] ?? 'secondary',
-                        'type' => $data['type'] ?? 'general',
-                        'action_url' => $data['action_url'] ?? '#',
-                        'product_name' => $data['product_name'] ?? null,
-                        'quantity' => $data['quantity'] ?? null,
-                        'total_amount' => $data['total_amount'] ?? null,
-                        'current_stock' => $data['current_stock'] ?? null,
-                        'min_stock' => $data['min_stock'] ?? null,
-                        'movement_type' => $data['movement_type'] ?? null,
-                        'invoice_number' => $data['invoice_number'] ?? null
-                    ],
-                    'read_at' => $notification->read_at,
-                    'created_at' => $notification->created_at->toISOString()
-                ];
+            ->map(function ($notif) {
+                return $this->formatNotification($notif);
             });
-        
-        $unreadCount = $user->unreadNotifications->count();
-        
+
         return response()->json([
             'notifications' => $notifications,
-            'unread_count' => $unreadCount
         ]);
     }
 
     /**
      * Marquer une notification comme lue
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function markAsRead($id)
+    public function markAsRead($id): JsonResponse
     {
         if (!Auth::check()) {
             return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
         }
 
-        $notification = Auth::user()->notifications()->findOrFail($id);
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
         $notification->markAsRead();
-        
-        if (request()->wantsJson()) {
-            return response()->json(['success' => true]);
-        }
-        
-        return back()->with('success', 'Notification marquée comme lue.');
+
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Marquer toutes les notifications comme lues
+     * Marquer toutes les notifications comme lues (par catégorie optionnelle via Request)
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function markAllAsRead(Request $request)
+    public function markAllAsRead(Request $request): JsonResponse
     {
         if (!Auth::check()) {
             return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
         }
 
-        Auth::user()->unreadNotifications->markAsRead();
-        
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+        $query = Notification::forUser(Auth::id())->unread();
+
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
         }
-        
-        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
+
+        $query->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Afficher une notification spécifique
+     * Formater les données de la notification pour JSON
      */
+    private function formatNotification($notif): array
+    {
+        // On surcharge l'icône par catégorie selon les règles demandées si possible
+        $icon = $notif->icon; // fallback
+        switch ($notif->category) {
+            case 'entree':
+                $icon = 'fas fa-arrow-down';
+                break;
+            case 'sortie':
+                $icon = 'fas fa-arrow-up';
+                break;
+            case 'alerte_stock':
+                $icon = 'fas fa-exclamation-triangle';
+                break;
+            case 'facture':
+                $icon = 'fas fa-file-invoice';
+                break;
+        }
+
+        return [
+            'id'         => $notif->id,
+            'title'      => $notif->title,
+            'body'       => $notif->body,
+            'type'       => $notif->type,
+            'category'   => $notif->category,
+            'icon'       => $icon,
+            'is_read'    => $notif->is_read,
+            'time_ago'   => $notif->time_ago ?? $notif->created_at->diffForHumans(),
+            'created_at' => $notif->created_at->toISOString(),
+        ];
+    }
+    
+    // ======== ROUTES POUR LES VUES (Gardées pour compatibilité avec le reste) ======== 
+    
+    public function showAll(Request $request)
+    {
+        if (!Auth::check()) return redirect()->route('login');
+        
+        $query = Notification::forUser(Auth::id())->latest();
+        if ($request->filled('type')) $query->ofType($request->type);
+        if ($request->filled('category')) $query->where('category', $request->category);
+
+        $notifications = $query->paginate(15);
+        $unreadCount = Notification::forUser(Auth::id())->unread()->count();
+
+        return view('notifications.index', compact('notifications', 'unreadCount'));
+    }
+
     public function show($id)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        $notification = Auth::user()->notifications()->findOrFail($id);
-        
-        if ($notification->unread()) {
-            $notification->markAsRead();
-        }
-        
-        $data = $notification->data;
-        
-        return view('notifications.show', compact('notification', 'data'));
+        if (!Auth::check()) return redirect()->route('login');
+        $notification = Notification::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        if ($notification->isUnread()) $notification->markAsRead();
+        return view('notifications.show', compact('notification'));
     }
 
-    /**
-     * Supprimer une notification
-     */
     public function destroy($id)
     {
-        if (!Auth::check()) {
-            return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
-        }
-
-        $notification = Auth::user()->notifications()->findOrFail($id);
-        $notification->delete();
-        
+        if (!Auth::check()) return response()->json(['success' => false], 401);
+        Notification::where('id', $id)->where('user_id', Auth::id())->delete();
         return back()->with('success', 'Notification supprimée.');
     }
 
-    /**
-     * Supprimer toutes les notifications
-     */
     public function destroyAll()
     {
-        if (!Auth::check()) {
-            return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
-        }
-
-        Auth::user()->notifications()->delete();
-        
+        if (!Auth::check()) return response()->json(['success' => false], 401);
+        Notification::forUser(Auth::id())->delete();
         return back()->with('success', 'Toutes les notifications ont été supprimées.');
-    }
-
-    /**
-     * Obtenir le nombre de notifications non lues
-     */
-    public function getUnreadCount()
-    {
-        if (!Auth::check()) {
-            return response()->json(['count' => 0]);
-        }
-
-        $count = Auth::user()->unreadNotifications->count();
-        
-        return response()->json(['count' => $count]);
     }
 }

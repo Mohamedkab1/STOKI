@@ -1,78 +1,103 @@
-<!-- resources/views/categories/index.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Catégories')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-5" data-aos="fade-down">
+<div class="space-y-8 animate-in">
+
+  {{-- Page header --}}
+  <div class="page-header">
     <div>
-        <h1 class="text-gradient mb-2">
-            <i class="fas fa-tags me-2"></i>
-            Catégories
-        </h1>
-        <p class="text-white-50">Gérez vos catégories de produits</p>
+      <h1 class="page-title">Catégories</h1>
+      <p class="text-text-muted mt-1 font-medium italic opacity-80">Gérez vos types de produits et organisez votre inventaire.</p>
     </div>
-    <a href="{{ route('categories.create') }}" class="btn-premium">
-        <i class="fas fa-plus me-2"></i> Nouvelle Catégorie
-    </a>
-</div>
+    <div>
+      <x-ui.button href="{{ route('categories.create') }}" tag="a" size="sm" icon="fas fa-plus shadow-sm">
+        Nouvelle catégorie
+      </x-ui.button>
+    </div>
+  </div>
 
-<div class="row g-4">
-    @forelse($categories as $category)
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 50 }}">
-            <div class="premium-card">
-                <div class="card-header-premium">
-                    <h5 class="mb-0">
-                        <i class="fas fa-folder me-2"></i>
-                        {{ $category->name }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-white-50 mb-3">
-                        {{ $category->description ?? 'Aucune description' }}
-                    </p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge" style="background: linear-gradient(135deg, #00f3ff 0%, #00c8ff 100%);">
-                            <i class="fas fa-box me-1"></i>
-                            {{ $category->products_count ?? $category->products->count() }} produits
-                        </span>
-                        <div>
-                            <a href="{{ route('categories.edit', $category) }}" 
-                               class="btn-premium btn-sm me-2"
-                               data-bs-toggle="tooltip" title="Modifier">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('categories.destroy', $category) }}" 
-                                  method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-premium btn-sm"
-                                        onclick="return confirm('Supprimer cette catégorie ?')"
-                                        data-bs-toggle="tooltip" title="Supprimer">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @empty
-        <div class="col-12">
-            <div class="premium-card text-center p-5" data-aos="fade-up">
-                <i class="fas fa-folder-open fa-4x text-gradient mb-3"></i>
-                <h4 class="text-white">Aucune catégorie</h4>
-                <p class="text-white-50 mb-4">Commencez par créer votre première catégorie</p>
-                <a href="{{ route('categories.create') }}" class="btn-premium">
-                    <i class="fas fa-plus me-2"></i> Créer une catégorie
-                </a>
-            </div>
-        </div>
-    @endforelse
-</div>
+  {{-- Categories list --}}
+  <div class="categories-list">
 
-<!-- Pagination -->
-<div class="d-flex justify-content-center mt-5">
-    {{ $categories->links() }}
+    {{-- List header --}}
+    <div class="list-header">
+      <span>Catégorie</span>
+      <span>Description</span>
+      <span>Produits</span>
+      <span>Actions</span>
+    </div>
+
+    {{-- Empty state --}}
+    @if($categories->isEmpty())
+    <div class="list-empty">
+      <i class="fas fa-folder-open text-4xl opacity-30"></i>
+      <p>Aucune catégorie trouvée.</p>
+      <x-ui.button href="{{ route('categories.create') }}" tag="a" size="sm">
+        Créer une catégorie
+      </x-ui.button>
+    </div>
+    @endif
+
+    {{-- List items --}}
+    @foreach($categories as $category)
+    <div class="list-item">
+
+      {{-- Nom + icône --}}
+      <div class="cat-name">
+        <div class="cat-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <span class="cat-label">{{ $category->name }}</span>
+      </div>
+
+      {{-- Description --}}
+      <div class="cat-desc">
+        {{ $category->description ?? '—' }}
+      </div>
+
+      {{-- Nombre de produits --}}
+      <div>
+        <span class="cat-badge">
+          {{ $category->products_count ?? $category->products->count() }}
+          {{ ($category->products_count ?? $category->products->count()) > 1 ? 'produits' : 'produit' }}
+        </span>
+      </div>
+
+      {{-- Actions --}}
+      <div class="cat-actions">
+        <a href="{{ route('categories.edit', $category) }}" class="act-btn edit" title="Modifier">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </a>
+        
+        <form action="{{ route('categories.destroy', $category) }}" method="POST" class="inline-block m-0 p-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')">
+          @csrf @method('DELETE')
+          <button type="submit" class="act-btn delete" title="Supprimer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+    </div>
+    @endforeach
+
+  </div>
+  
+  <!-- Pagination -->
+  @if($categories->hasPages())
+  <div class="pt-8">
+      {{ $categories->links() }}
+  </div>
+  @endif
+
 </div>
 @endsection
