@@ -35,7 +35,7 @@ unset($__defined_vars, $__key, $__value); ?>
             <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/10">
                 <i class="fas fa-cubes text-xl text-white"></i>
             </div>
-            <span class="text-xl font-black tracking-tight text-text-main">STOKI<span class="text-brand-primary">ERP</span></span>
+            <span class="text-xl font-black tracking-tight" style="color: #ffffff;">STOKI<span style="color: #4f46e5;">ERP</span></span>
         </div>
         <!-- Bouton fermé optionnel s'il est désiré sur mobile, géré par le JS -->
         <button id="sidebar-close" class="hamburger-btn" style="display: none;">
@@ -69,9 +69,10 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
 <?php endif; ?>
 
-        <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Inventaire</div>
-        
-        <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
+        <?php if(!auth()->user()->isSuperAdmin()): ?>
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Inventaire</div>
+            
+            <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layout.nav-link','data' => ['href' => ''.e(route('products.index')).'','active' => request()->routeIs('products.*'),'icon' => 'fas fa-box']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('layout.nav-link'); ?>
@@ -81,8 +82,8 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['href' => ''.e(route('products.index')).'','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('products.*')),'icon' => 'fas fa-box']); ?>
-            Produits
-         <?php echo $__env->renderComponent(); ?>
+                Produits
+             <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8)): ?>
 <?php $attributes = $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
@@ -93,7 +94,7 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
 <?php endif; ?>
 
-        <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layout.nav-link','data' => ['href' => ''.e(route('categories.index')).'','active' => request()->routeIs('categories.*'),'icon' => 'fas fa-tags']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('layout.nav-link'); ?>
@@ -103,8 +104,8 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['href' => ''.e(route('categories.index')).'','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('categories.*')),'icon' => 'fas fa-tags']); ?>
-            Catégories
-         <?php echo $__env->renderComponent(); ?>
+                Catégories
+             <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8)): ?>
 <?php $attributes = $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
@@ -115,9 +116,9 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
 <?php endif; ?>
 
-        <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Opérations</div>
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Opérations</div>
 
-        <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layout.nav-link','data' => ['href' => ''.e(route('invoices.index')).'','icon' => 'fas fa-file-invoice-dollar','active' => request()->routeIs('invoices.*')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('layout.nav-link'); ?>
@@ -127,8 +128,8 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['href' => ''.e(route('invoices.index')).'','icon' => 'fas fa-file-invoice-dollar','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('invoices.*'))]); ?>
-            Factures
-         <?php echo $__env->renderComponent(); ?>
+                Factures
+             <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8)): ?>
 <?php $attributes = $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
@@ -138,6 +139,7 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
 <?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
 <?php endif; ?>
+        <?php endif; ?>
 
         <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Système</div>
 
@@ -166,6 +168,31 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
 <?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
 <?php endif; ?>
+
+        <?php if(auth()->user()->isSuperAdmin()): ?>
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-rose-500 uppercase tracking-widest opacity-80">Administration</div>
+            <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layout.nav-link','data' => ['href' => ''.e(route('superadmin.admins.index')).'','icon' => 'fas fa-user-shield','active' => request()->routeIs('superadmin.*')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layout.nav-link'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['href' => ''.e(route('superadmin.admins.index')).'','icon' => 'fas fa-user-shield','active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('superadmin.*'))]); ?>
+                Gérer les Admins
+             <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8)): ?>
+<?php $attributes = $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
+<?php unset($__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8)): ?>
+<?php $component = $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8; ?>
+<?php unset($__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8); ?>
+<?php endif; ?>
+        <?php endif; ?>
 
         <?php if (isset($component)) { $__componentOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalb65f2aa001741ba3dcf3034163b2c9e8 = $attributes; } ?>

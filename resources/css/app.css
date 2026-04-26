@@ -1,46 +1,46 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #4f46e5;
-  --color-brand-primary-hover: #4338ca;
-  --color-brand-secondary: #0f172a;
-  
+  --color-brand-primary: #0ea5e9;
+  --color-brand-primary-hover: #0284c7;
+  --color-brand-secondary: #0b1121;
+
   --color-text-main: var(--text-main);
   --color-text-muted: var(--text-muted);
   --color-bg-app: var(--bg-app);
   --color-bg-card: var(--bg-card);
   --color-border-subtle: var(--border-subtle);
-  
-  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+
+  --shadow-premium: 0 10px 25px -5px rgba(14, 165, 233, 0.08);
 }
 
 /* Variante dark : supporte la classe .dark ET l'attribut data-theme="dark" */
 @variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --text-main: #1e293b;
+  --text-main: #0f172a;
   --text-muted: #64748b;
   --bg-app: #f8fafc;
   --bg-card: #ffffff;
   --border-subtle: #e2e8f0;
 
   --nav-backdrop: rgba(255, 255, 255, 0.82);
-  --sidebar-active: rgba(79, 70, 229, 0.05);
-  --grid-color: rgba(0, 0, 0, 0.04);
+  --sidebar-active: rgba(14, 165, 233, 0.08);
+  --grid-color: rgba(14, 165, 233, 0.03);
 }
 
 .dark,
 [data-theme="dark"] {
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --bg-app: #0f172a;
-  --bg-card: #1e293b;
-  --border-subtle: #334155;
+  --bg-app: #0b1121;
+  --bg-card: rgba(17, 24, 39, 0.8);
+  --border-subtle: #1f2937;
 
-  --nav-backdrop: rgba(15, 23, 42, 0.85);
-  --sidebar-active: rgba(255, 255, 255, 0.04);
-  --grid-color: rgba(255, 255, 255, 0.04);
-  
+  --nav-backdrop: rgba(11, 17, 33, 0.85);
+  --sidebar-active: rgba(56, 189, 248, 0.1);
+  --grid-color: rgba(56, 189, 248, 0.03);
+
   color-scheme: dark;
 }
 
@@ -52,8 +52,14 @@
   }
 
   /* Custom Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-border-subtle rounded-full hover:bg-text-muted transition-colors;
   }
@@ -65,12 +71,23 @@
     border: 1px solid var(--border-subtle);
     @apply rounded-xl shadow-premium transition-all duration-300;
   }
-  
+
   /* Indicators */
-  .indicator-indigo { @apply bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400; }
-  .indicator-rose { @apply bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400; }
-  .indicator-emerald { @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400; }
-  .indicator-sky { @apply bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400; }
+  .indicator-indigo {
+    @apply bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400;
+  }
+
+  .indicator-rose {
+    @apply bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400;
+  }
+
+  .indicator-emerald {
+    @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400;
+  }
+
+  .indicator-sky {
+    @apply bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400;
+  }
 
   .modern-table-header {
     background-color: var(--sidebar-active);
@@ -83,15 +100,55 @@
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Semantic Classes mapping to variables for blade files */
-.text-main { color: var(--text-main); }
-.text-muted { color: var(--text-muted); }
-.bg-app { background-color: var(--bg-app); }
-.bg-card { background-color: var(--bg-card); }
-.border-border-subtle { border-color: var(--border-subtle); }
-.bg-sidebar-active { background-color: var(--sidebar-active); }
-.bg-nav-backdrop { background-color: var(--nav-backdrop); }
+.text-main {
+  color: var(--text-main);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-app {
+  background-color: var(--bg-app);
+}
+
+.bg-card {
+  background-color: var(--bg-card);
+}
+
+.border-border-subtle {
+  border-color: var(--border-subtle);
+}
+
+.bg-sidebar-active {
+  background-color: var(--sidebar-active);
+}
+
+.bg-nav-backdrop {
+  background-color: var(--nav-backdrop);
+}
+
+/* Product Actions Extensions */
+.act-btn.act-delete svg {
+  stroke: #f43f5e;
+}
+
+.act-btn.act-delete:hover {
+  background-color: #fff1f2;
+}
+
+.dark .act-btn.act-delete:hover {
+  background-color: rgba(244, 63, 94, 0.1);
+}

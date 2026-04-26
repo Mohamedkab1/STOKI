@@ -29,11 +29,14 @@ class ProfileController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'language' => 'nullable|string|in:fr,ar,en',
+            'timezone' => 'nullable|string',
+            'date_format' => 'nullable|string',
         ]);
 
         $user->update($validated);
 
-        return back()->with('success', 'Profil mis à jour avec succès.');
+        return back()->with('success', 'Paramètres mis à jour avec succès.');
     }
 
     /**

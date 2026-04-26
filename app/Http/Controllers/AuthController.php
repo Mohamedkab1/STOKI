@@ -29,16 +29,21 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // Ajouter des logs pour debug
-        \Log::info('Tentative de connexion', ['email' => $request->email]);
-
         if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $user = Auth::user();
+
+            if ($user->status !== 'active') {
+                Auth::logout();
+                $message = $user->status === 'pending' 
+                    ? 'Votre compte est en attente d\'approbation par le Super Admin.' 
+                    : 'Votre compte a été rejeté.';
+                
+                return back()->withErrors(['email' => $message])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
-            \Log::info('Connexion réussie', ['user_id' => Auth::id()]);
             return redirect()->intended('/');
         }
-
-        \Log::warning('Échec connexion', ['email' => $request->email]);
         
         return back()->withErrors([
             'email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.',
@@ -56,19 +61,21 @@ class AuthController extends Controller
     /**
      * Traiter l'inscription
      */
-    public function register(Request $request)
+    public function register(\App\Http\Requests\Auth\RegisterRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $status = $request->role === 'admin' ? 'pending' : 'active';
 
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'status' => $status,
         ]);
+
+        if ($user->status === 'pending') {
+            return redirect()->route('login')->with('status', 'Votre compte administrateur a été créé et est en attente d\'approbation.');
+        }
 
         Auth::login($user);
 

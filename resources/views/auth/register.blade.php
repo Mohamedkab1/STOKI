@@ -101,6 +101,8 @@
                     </div>
                 </div>
 
+                <input type="hidden" name="role" value="admin">
+
                 <div class="pt-4">
                     <x-ui.button type="submit" class="w-full py-3" icon="fas fa-user-plus shadow-sm">
                         Créer mon compte

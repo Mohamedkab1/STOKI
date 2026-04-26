@@ -10,7 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- CSS & JS (Vite / Tailwind) -->
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -98,7 +98,7 @@
         <!-- Footer -->
         <footer style="background: var(--bg-page); border-top: 1px solid var(--border-color);" class="py-10 px-6 text-center mt-auto">
             <p style="color: var(--text-muted);" class="text-xs">
-                &copy; <?php echo e(date('Y')); ?> <span style="color: var(--text-primary);" class="font-bold">Stoki ERP</span>. Tous droits réservés.
+                &copy; <?php echo e(date('Y')); ?> <span style="color: var(--text-primary);" class="font-bold">Stoki </span>. Tous droits réservés.
             </p>
         </footer>
     </div>

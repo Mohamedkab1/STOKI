@@ -50,6 +50,18 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user->status !== 'active') {
+            Auth::logout();
+            $message = $user->status === 'pending' 
+                ? 'Votre compte est en attente d\'approbation.' 
+                : 'Votre compte a été rejeté.';
+            
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

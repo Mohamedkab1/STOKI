@@ -6,8 +6,14 @@
   <!-- Header -->
   <div class="page-header">
       <div>
-          <h1 class="page-title">Tableau de bord</h1>
-          <p class="text-text-muted mt-1 font-medium italic opacity-80">Aperçu global de vos activités et de l'état de votre stock.</p>
+          <h1 class="page-title">Tableau de bord <?php echo e(auth()->user()->isSuperAdmin() ? 'Super Admin' : ''); ?></h1>
+          <p class="text-text-muted mt-1 font-medium italic opacity-80">
+            <?php if(auth()->user()->isSuperAdmin()): ?>
+                Aperçu global de l'écosystème Stoki ERP et gestion des administrateurs.
+            <?php else: ?>
+                Aperçu global de vos activités et de l'état de votre stock.
+            <?php endif; ?>
+          </p>
       </div>
       <div class="text-sm font-medium text-text-secondary border border-border-color rounded-lg px-4 py-2 bg-bg-surface">
           <?php echo e(now()->isoFormat('LL')); ?>
@@ -22,11 +28,27 @@
               <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
           </div>
           <div>
-              <div class="stat-label">Total produits</div>
+              <div class="stat-label">Produits (Total Site)</div>
               <div class="stat-value"><?php echo e($totalProducts); ?></div>
           </div>
       </div>
       
+      <?php if(auth()->user()->isSuperAdmin()): ?>
+      <div class="stat-card border-l-4 border-rose-500">
+          <div class="stat-icon bg-rose-50 text-rose-500">
+              <i class="fas fa-user-shield"></i>
+          </div>
+          <div>
+              <div class="stat-label">Admins Actifs</div>
+              <div class="stat-value"><?php echo e($totalAdmins); ?></div>
+              <?php if($pendingAdmins > 0): ?>
+                <div class="text-[10px] text-rose-500 font-bold mt-1 animate-pulse">
+                    <?php echo e($pendingAdmins); ?> en attente
+                </div>
+              <?php endif; ?>
+          </div>
+      </div>
+      <?php else: ?>
       <div class="stat-card">
           <div class="stat-icon stat-icon-orange">
               <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -36,13 +58,14 @@
               <div class="stat-value"><?php echo e($lowStockCount); ?></div>
           </div>
       </div>
+      <?php endif; ?>
       
       <div class="stat-card">
           <div class="stat-icon stat-icon-green">
               <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
           </div>
           <div>
-              <div class="stat-label">Valeur totale stock</div>
+              <div class="stat-label">Valeur du Rendu (Site)</div>
               <div class="stat-value"><?php echo e(number_format($totalStockValue, 2)); ?> <span class="text-xs text-text-secondary">MAD</span></div>
           </div>
       </div>
@@ -52,7 +75,7 @@
               <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
           </div>
           <div>
-              <div class="stat-label">Chiffre d'affaires</div>
+              <div class="stat-label">CA Global</div>
               <div class="stat-value"><?php echo e(number_format($caTotal, 2)); ?> <span class="text-xs text-text-secondary">MAD</span></div>
           </div>
       </div>

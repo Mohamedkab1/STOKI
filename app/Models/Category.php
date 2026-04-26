@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'description'];
+    use \App\Traits\BelongsToUser;
+
+    protected $fillable = ['name', 'description', 'user_id'];
 
     public function products(): HasMany
     {

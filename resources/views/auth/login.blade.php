@@ -39,6 +39,13 @@
                 <p class="text-xs text-text-muted mt-1 uppercase tracking-widest font-semibold">Accès Administrateur</p>
             </div>
 
+            @if(session('status'))
+                <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs flex items-center gap-2">
+                    <i class="fas fa-check-circle text-emerald-500 text-sm"></i>
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-800 text-xs">
                     <ul class="space-y-1">
@@ -95,6 +102,13 @@
                     </x-ui.button>
                 </div>
             </form>
+
+            <div class="text-center mt-6 pt-6 border-t border-border-subtle">
+                <p class="text-xs text-text-muted font-semibold leading-relaxed">
+                    Nouveau ici ? 
+                    <a href="{{ route('register') }}" class="text-brand-primary hover:underline font-bold">Demander un accès Admin</a>
+                </p>
+            </div>
         </x-ui.card>
 
         <div class="mt-10 text-center">

@@ -51,20 +51,21 @@ class FactureObserver
                     break;
             }
 
-            // Utilisateur créateur, ou l'admin
-            // Dans ce cas, on notifie l'utilisateur courant, 
-            // ou on peut cibler le user_id de la facture si disponible.
-            // S'il n'y a pas de user_id dans Invoice, on prend l'user connecté
-            $userId = Auth::id() ?? 1;
+            // On notifie TOUS les administrateurs actifs
+            $admins = User::where('status', 'active')
+                ->whereIn('role', ['admin', 'superadmin'])
+                ->get();
 
-            Notification::create([
-                'user_id'  => $userId,
-                'title'    => 'Facture #' . $invoice->invoice_number . ' — ' . $statutDisplay,
-                'body'     => 'Client: ' . ($invoice->customer_supplier ?? 'N/A') . ' — Montant: ' . $invoice->total_amount . ' MAD',
-                'type'     => $type,
-                'category' => 'facture',
-                'is_read'  => false,
-            ]);
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'user_id'  => $admin->id,
+                    'title'    => 'Facture #' . $invoice->invoice_number . ' — ' . $statutDisplay,
+                    'body'     => 'Client: ' . ($invoice->customer_supplier ?? 'N/A') . ' — Montant: ' . $invoice->total_amount . ' MAD',
+                    'type'     => $type,
+                    'category' => 'facture',
+                    'is_read'  => false,
+                ]);
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 @props(['active' => false, 'icon' => null])
 
 <a {{ $attributes }} @class([
-    'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 group relative',
+    'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 group relative no-underline hover:no-underline',
     'text-brand-primary bg-sidebar-active' => $active,
     'text-text-muted hover:text-text-main hover:bg-sidebar-active' => !$active,
 ])>

@@ -58,27 +58,31 @@ class MouvementObserver
         $stockActuel  = $produit->quantity;
         $stockMinimum = $produit->min_stock;
 
-        // Stock épuisé (= 0) — Priorité haute
-        if ($stockActuel <= 0) {
-            Notification::create([
-                'user_id'  => $userId,
-                'title'    => 'Stock épuisé : ' . $produit->name,
-                'body'     => 'Le produit est en rupture de stock.',
-                'type'     => 'danger',
-                'category' => 'alerte_stock',
-                'is_read'  => false,
-            ]);
-        }
-        // Stock faible (≤ stock_minimum) — Attention requise
-        elseif ($stockMinimum > 0 && $stockActuel <= $stockMinimum) {
-            Notification::create([
-                'user_id'  => $userId,
-                'title'    => 'Stock faible : ' . $produit->name . ' (' . $stockActuel . ' restants)',
-                'body'     => 'Il reste ' . $stockActuel . '/' . $stockMinimum . ' unités.',
-                'type'     => 'warning',
-                'category' => 'alerte_stock',
-                'is_read'  => false,
-            ]);
+        // Si le stock est faible ou épuisé, on notifie TOUS les admins (y compris Super Admin)
+        if ($stockActuel <= $stockMinimum || $stockActuel <= 0) {
+            $admins = \App\Models\User::where('status', 'active')
+                ->whereIn('role', ['admin', 'superadmin'])
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($stockActuel <= 0) {
+                    Notification::create([
+                        'user_id'  => $admin->id,
+                        'title'    => 'Rupture de Stock : ' . $produit->name,
+                        'body'     => 'Le produit est épuisé ! Action requise.',
+                        'type'     => 'danger',
+                        'category' => 'alerte_stock',
+                    ]);
+                } elseif ($stockMinimum > 0 && $stockActuel <= $stockMinimum) {
+                    Notification::create([
+                        'user_id'  => $admin->id,
+                        'title'    => 'Stock Faible : ' . $produit->name,
+                        'body'     => "Niveau critique : {$stockActuel} / {$stockMinimum} unités.",
+                        'type'     => 'warning',
+                        'category' => 'alerte_stock',
+                    ]);
+                }
+            }
         }
     }
 

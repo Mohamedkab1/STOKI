@@ -7,9 +7,9 @@
 <nav class="navbar navbar-expand-lg sticky-top" style="background: var(--navbar-bg); border-bottom: 1px solid var(--border-color); backdrop-filter: blur(10px);">
     <div class="container-fluid">
         <!-- Logo / Brand -->
-        <a class="navbar-brand" href="{{ route('dashboard') }}" style="color: var(--text-primary); font-weight: 800;">
-            <i class="fas fa-cubes me-2" style="color: var(--accent);"></i>
-            Stoki
+        <a class="navbar-brand" href="{{ route('dashboard') }}" style="color: #ffffff; font-weight: 800; text-decoration: none;">
+            <i class="fas fa-cubes me-2" style="color: #4f46e5;"></i>
+            STOKI<span style="color: #4f46e5;">ERP</span>
         </a>
         
         <!-- Bouton toggle pour mobile -->

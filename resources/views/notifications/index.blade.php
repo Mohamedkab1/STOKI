@@ -21,6 +21,9 @@
   <!-- Tabs -->
   <div class="tabs-bar">
       
+      <button class="tab-btn" :class="{ 'active': activeTab === '' }" @click="setActiveTab('')">
+          Tout <span class="tab-count" x-show="unreadTotal > 0" x-text="unreadTotal"></span>
+      </button>
       <button class="tab-btn" :class="{ 'active': activeTab === 'entree' }" @click="setActiveTab('entree')">
           Entrées <span class="tab-count" x-show="unreadCategories.entree > 0" x-text="unreadCategories.entree"></span>
       </button>
@@ -111,8 +114,8 @@ function notificationsPage() {
         
         async fetchNotifications(category) {
             this.notifications = [];
-            // Assuming fallback logic for fetching
-            let url = category === '' ? '/notifications/api/index' : `/notifications/category/${category}`;
+            // L'URL pour "Tout" est /notifications, sinon /notifications/category/{id}
+            let url = category === '' ? '/notifications' : `/notifications/category/${category}`;
             
             try {
                 const res = await fetch(url);

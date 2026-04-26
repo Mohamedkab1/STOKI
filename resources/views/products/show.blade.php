@@ -18,6 +18,13 @@
             <x-ui.button @click="activeTab = 'adjust'; document.getElementById('adjust-section').scrollIntoView({behavior:'smooth'})" icon="fas fa-exchange-alt">
                 Mouvement
             </x-ui.button>
+            <form action="{{ route('products.destroy', $product) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                @csrf
+                @method('DELETE')
+                <x-ui.button type="submit" variant="danger" icon="fas fa-trash-alt">
+                    Supprimer
+                </x-ui.button>
+            </form>
         </div>
     </div>
 

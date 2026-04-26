@@ -25,10 +25,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Forcer HTTPS en production pour éviter les erreurs de "Mixed Content" sur Railway
+        if (config('app.env') === 'production' || env('FORCE_HTTPS', false)) {
+            \URL::forceScheme('https');
+        }
+
         // Observer des mouvements de stock → génère des notifications
         StockMovement::observe(MouvementObserver::class);
         
         // Observer des factures → génère des notifications de category facture
         \App\Models\Invoice::observe(\App\Observers\FactureObserver::class);
+
+        // Observer des utilisateurs → notifie le Super Admin des inscriptions
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
     }
 }

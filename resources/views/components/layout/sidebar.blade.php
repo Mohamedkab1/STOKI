@@ -7,7 +7,7 @@
             <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/10">
                 <i class="fas fa-cubes text-xl text-white"></i>
             </div>
-            <span class="text-xl font-black tracking-tight text-text-main">STOKI<span class="text-brand-primary">ERP</span></span>
+            <span class="text-xl font-black tracking-tight" style="color: #ffffff;">STOKI<span style="color: #4f46e5;">ERP</span></span>
         </div>
         <!-- Bouton fermé optionnel s'il est désiré sur mobile, géré par le JS -->
         <button id="sidebar-close" class="hamburger-btn" style="display: none;">
@@ -23,21 +23,23 @@
             Tableau de Bord
         </x-layout.nav-link>
 
-        <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Inventaire</div>
-        
-        <x-layout.nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.*')" icon="fas fa-box">
-            Produits
-        </x-layout.nav-link>
+        @if(!auth()->user()->isSuperAdmin())
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Inventaire</div>
+            
+            <x-layout.nav-link href="{{ route('products.index') }}" :active="request()->routeIs('products.*')" icon="fas fa-box">
+                Produits
+            </x-layout.nav-link>
 
-        <x-layout.nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')" icon="fas fa-tags">
-            Catégories
-        </x-layout.nav-link>
+            <x-layout.nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')" icon="fas fa-tags">
+                Catégories
+            </x-layout.nav-link>
 
-        <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Opérations</div>
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Opérations</div>
 
-        <x-layout.nav-link href="{{ route('invoices.index') }}" icon="fas fa-file-invoice-dollar" :active="request()->routeIs('invoices.*')">
-            Factures
-        </x-layout.nav-link>
+            <x-layout.nav-link href="{{ route('invoices.index') }}" icon="fas fa-file-invoice-dollar" :active="request()->routeIs('invoices.*')">
+                Factures
+            </x-layout.nav-link>
+        @endif
 
         <div class="px-4 py-2 mt-4 text-[10px] font-bold text-text-muted uppercase tracking-widest opacity-60">Système</div>
 
@@ -48,6 +50,13 @@
                 <span class="ml-auto bg-brand-primary text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">{{ $unreadCount }}</span>
             @endif
         </x-layout.nav-link>
+
+        @if(auth()->user()->isSuperAdmin())
+            <div class="px-4 py-2 mt-4 text-[10px] font-bold text-rose-500 uppercase tracking-widest opacity-80">Administration</div>
+            <x-layout.nav-link href="{{ route('superadmin.admins.index') }}" icon="fas fa-user-shield" :active="request()->routeIs('superadmin.*')">
+                Gérer les Admins
+            </x-layout.nav-link>
+        @endif
 
         <x-layout.nav-link href="{{ route('profile') }}" icon="fas fa-user-gear" :active="request()->routeIs('profile*')">
             Paramètres

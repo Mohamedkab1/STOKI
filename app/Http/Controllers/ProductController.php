@@ -158,9 +158,36 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        if ($product->image) Storage::disk('public')->delete($product->image);
-        $product->delete();
-        return redirect()->route('products.index')->with('success', 'Produit supprimé.');
+        try {
+            DB::beginTransaction();
+
+            // 1. Supprimer l'image du produit
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            // 2. Nettoyer les relations (Certaines tables n'ont pas d'onDelete cascade)
+            // On commence par les éléments de facture liés à ce produit
+            DB::table('invoice_items')->where('product_id', $product->id)->delete();
+            
+            // On supprime les factures directes (si elles existent via product_id)
+            $product->invoices()->delete();
+            
+            // On supprime les mouvements de stock et les lots
+            $product->stockMovements()->delete();
+            $product->batches()->delete();
+
+            // 3. Enfin, on supprime le produit
+            $product->delete();
+
+            DB::commit();
+            return redirect()->route('products.index')->with('success', 'Le produit et toutes ses données associées ont été supprimés.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur lors de la suppression du produit ' . $product->id . ' : ' . $e->getMessage());
+            return back()->with('error', 'Impossible de supprimer le produit car il est lié à d\'autres enregistrements : ' . $e->getMessage());
+        }
     }
 
     public function adjustStock(Request $request, Product $product)

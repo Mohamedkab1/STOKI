@@ -1,33 +1,51 @@
 <?php
-// database/seeders/DatabaseSeeder.php
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\StockMovement;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
     {
-        // Créer des catégories
+        // 1. Créer le Super Admin
+        $superAdmin = User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@stoki.com',
+            'password' => Hash::make('password'),
+            'role' => 'superadmin',
+            'status' => 'active',
+        ]);
+
+        // 2. Créer un Admin par défaut
+        $admin = User::create([
+            'name' => 'Admin Stoki',
+            'email' => 'admin@stoki.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        // 3. Créer des catégories pour l'admin par défaut
         $categories = [
-            ['name' => 'Électronique', 'description' => 'Produits électroniques'],
-            ['name' => 'Vêtements', 'description' => 'Vêtements et accessoires'],
-            ['name' => 'Alimentation', 'description' => 'Produits alimentaires'],
-            ['name' => 'Livres', 'description' => 'Livres et magazines'],
+            ['name' => 'Électronique', 'description' => 'Produits électroniques', 'user_id' => $admin->id],
+            ['name' => 'Vêtements', 'description' => 'Vêtements et accessoires', 'user_id' => $admin->id],
+            ['name' => 'Alimentation', 'description' => 'Produits alimentaires', 'user_id' => $admin->id],
         ];
 
-        foreach ($categories as $category) {
-            Category::create($category);
+        foreach ($categories as $catData) {
+            Category::create($catData);
         }
 
-        // Créer des produits
+        // 4. Créer des produits pour l'admin par défaut
         $products = [
             [
                 'name' => 'Smartphone XYZ',
@@ -36,7 +54,9 @@ class DatabaseSeeder extends Seeder
                 'price' => 599.99,
                 'quantity' => 50,
                 'min_stock' => 10,
-                'category_id' => 1
+                'category_id' => 1,
+                'user_id' => $admin->id,
+                'image' => 'products/d50A9TaVWBqq4KDkMhS1ShDoJWaBk3OsmG6QNNQZ.png'
             ],
             [
                 'name' => 'T-shirt Coton',
@@ -45,45 +65,23 @@ class DatabaseSeeder extends Seeder
                 'price' => 19.99,
                 'quantity' => 200,
                 'min_stock' => 30,
-                'category_id' => 2
-            ],
-            [
-                'name' => 'Pâtes',
-                'sku' => 'AL-001',
-                'description' => 'Pâtes italiennes',
-                'price' => 2.50,
-                'quantity' => 500,
-                'min_stock' => 100,
-                'category_id' => 3
-            ],
-            [
-                'name' => 'Roman Policier',
-                'sku' => 'LV-001',
-                'description' => 'Meilleure vente',
-                'price' => 15.00,
-                'quantity' => 30,
-                'min_stock' => 5,
-                'category_id' => 4
+                'category_id' => 2,
+                'user_id' => $admin->id,
+                'image' => 'products/EO1kFFpt4LXaeBYm2bhWfqUdEpnFEgjmxN4sFeDD.png'
             ],
         ];
 
-        foreach ($products as $product) {
-            Product::create($product);
+        foreach ($products as $prodData) {
+            Product::create($prodData);
         }
 
-        // Créer quelques mouvements de stock
+        // 5. Mouvements de stock
         StockMovement::create([
             'product_id' => 1,
             'type' => 'in',
             'quantity' => 10,
-            'reason' => 'Réapprovisionnement'
-        ]);
-
-        StockMovement::create([
-            'product_id' => 1,
-            'type' => 'out',
-            'quantity' => 5,
-            'reason' => 'Vente'
+            'reason' => 'Réapprovisionnement',
+            'user_id' => $admin->id
         ]);
     }
 }

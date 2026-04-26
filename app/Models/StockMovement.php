@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
+    use \App\Traits\BelongsToUser;
+
     const TYPE_IN = 'in';
     const TYPE_OUT = 'out';
     const TYPE_ADJUSTMENT = 'adjustment';
@@ -20,7 +22,12 @@ class StockMovement extends Model
         'total_price',
         'reason',
         'note',
-        'invoice_id'
+        'invoice_id',
+        'reference_type',
+        'reference_id',
+        'price',
+        'product_batch_id',
+        'user_id',
     ];
 
     protected $casts = [

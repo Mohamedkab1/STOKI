@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'role',
+        'status',
     ];
 
     /**
@@ -65,5 +67,21 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class, 'user_id')
             ->where('is_read', false)
             ->latest();
+    }
+
+    /**
+     * Vérifier si l'utilisateur est un Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin';
+    }
+
+    /**
+     * Vérifier si l'utilisateur est un Admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' || $this->role === 'superadmin';
     }
 }

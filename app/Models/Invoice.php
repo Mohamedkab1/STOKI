@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
+    use \App\Traits\BelongsToUser;
+
     protected $fillable = [
         'invoice_number',
         'type',
@@ -22,7 +24,8 @@ class Invoice extends Model
         'payment_method',
         'payment_status',
         'invoice_date',
-        'stock_movement_id'  // Ajoutez ceci
+        'stock_movement_id',
+        'user_id'
     ];
 
     protected $casts = [

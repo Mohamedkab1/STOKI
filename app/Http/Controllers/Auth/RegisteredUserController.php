@@ -28,21 +28,23 @@ class RegisteredUserController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(\App\Http\Requests\Auth\RegisterRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $status = $request->role === 'admin' ? 'pending' : 'active';
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'status' => $status,
         ]);
 
         event(new Registered($user));
+
+        if ($user->status === 'pending') {
+            return redirect()->route('login')->with('status', 'Votre compte administrateur est en attente d\'approbation par le Super Admin.');
+        }
 
         Auth::login($user);
 

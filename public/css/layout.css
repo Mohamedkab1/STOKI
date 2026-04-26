@@ -22,6 +22,8 @@
   left: 0;
   z-index: 100;
   background: var(--sidebar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-right: 1px solid var(--border-color);
   transition: transform 0.3s ease;
   overflow-y: auto;
@@ -44,6 +46,8 @@
   top: 0;
   z-index: 50;
   background: var(--navbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--navbar-border);
   display: flex;
   align-items: center;

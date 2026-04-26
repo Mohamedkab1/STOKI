@@ -79,6 +79,10 @@ class DashboardController extends Controller
         $totalEntrees = array_sum($chartEntrees);
         $totalSorties = array_sum($chartSorties);
         
+        // Stats Super Admin (si applicable)
+        $totalAdmins = \App\Models\User::where('role', 'admin')->count();
+        $pendingAdmins = \App\Models\User::where('role', 'admin')->where('status', 'pending')->count();
+        
         return view('dashboard.index', compact(
             'totalProducts',
             'totalCategories',
@@ -96,7 +100,9 @@ class DashboardController extends Controller
             'totalEntrees',
             'totalSorties',
             'dateFrom',
-            'dateTo'
+            'dateTo',
+            'totalAdmins',
+            'pendingAdmins'
         ));
     }
 }

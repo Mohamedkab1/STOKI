@@ -103,6 +103,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/recent-activities', [DashboardController::class, 'getRecentActivities'])->name('recent-activities');
     });
 
+    // ========== ROUTES SUPER ADMIN ==========
+    Route::middleware(['superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+        Route::get('/admins', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'index'])->name('admins.index');
+        Route::get('/admins/create', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'create'])->name('admins.create');
+        Route::post('/admins', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'store'])->name('admins.store');
+        Route::post('/admins/{admin}/approve', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'approve'])->name('admins.approve');
+        Route::post('/admins/{admin}/reject', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'reject'])->name('admins.reject');
+        Route::get('/admins/{admin}/edit', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'edit'])->name('admins.edit');
+        Route::put('/admins/{admin}', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'update'])->name('admins.update');
+        Route::delete('/admins/{admin}', [\App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'destroy'])->name('admins.destroy');
+    });
+
 });
 
 // ========== ROUTES BREEZE (Email Verification, Password Reset, Profile) ==========

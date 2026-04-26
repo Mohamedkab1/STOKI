@@ -29,14 +29,14 @@
     --border-subtle: #f1f5f9;
 
     /* --- Accent principal --- */
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --accent-light: rgba(79, 70, 229, 0.08);
-    --accent-ring: rgba(79, 70, 229, 0.15);
+    --accent: #0ea5e9;
+    --accent-hover: #0284c7;
+    --accent-light: rgba(14, 165, 233, 0.08);
+    --accent-ring: rgba(14, 165, 233, 0.15);
 
     /* --- Sidebar --- */
-    --sidebar-bg: #1e293b;
-    --sidebar-text: #94a3b8;
+    --sidebar-bg: #323d4f;
+    --sidebar-text: #ffffff;
     --sidebar-active: rgba(255, 255, 255, 0.1);
     --sidebar-active-text: #ffffff;
     --sidebar-hover: rgba(255, 255, 255, 0.05);
@@ -58,10 +58,10 @@
     --input-focus-ring: rgba(79, 70, 229, 0.15);
 
     /* --- Bouton Principal --- */
-    --btn-primary-bg: #4f46e5;
+    --btn-primary-bg: #0ea5e9;
     --btn-primary-text: #ffffff;
-    --btn-primary-hover: #4338ca;
-    --btn-primary-ring: rgba(79, 70, 229, 0.2);
+    --btn-primary-hover: #0284c7;
+    --btn-primary-ring: rgba(14, 165, 233, 0.2);
 
     /* --- Badges / Status --- */
     --badge-success-bg: #ecfdf5;
@@ -125,11 +125,11 @@
 .dark,
 [data-theme="dark"] {
     /* --- Arrière-plans --- */
-    --bg-page: #0f172a;
-    --bg-surface: #1e293b;
-    --bg-card: #1e293b;
-    --bg-elevated: #1e293b;
-    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --bg-page: #0b1121;
+    --bg-surface: #111827;
+    --bg-card: rgba(17, 24, 39, 0.8);
+    --bg-elevated: #1f2937;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
 
     /* --- Textes --- */
     --text-primary: #f1f5f9;
@@ -142,39 +142,39 @@
     --border-subtle: #1e293b;
 
     /* --- Accent principal --- */
-    --accent: #818cf8;
-    --accent-hover: #6366f1;
-    --accent-light: rgba(129, 140, 248, 0.12);
-    --accent-ring: rgba(129, 140, 248, 0.2);
+    --accent: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --accent-light: rgba(56, 189, 248, 0.12);
+    --accent-ring: rgba(56, 189, 248, 0.25);
 
     /* --- Sidebar --- */
-    --sidebar-bg: #0f172a;
-    --sidebar-text: #64748b;
-    --sidebar-active: rgba(255, 255, 255, 0.06);
-    --sidebar-active-text: #f1f5f9;
-    --sidebar-hover: rgba(255, 255, 255, 0.03);
-    --sidebar-border: rgba(255, 255, 255, 0.04);
+    --sidebar-bg: #0b1121;
+    --sidebar-text: #94a3b8;
+    --sidebar-active: rgba(56, 189, 248, 0.1);
+    --sidebar-active-text: #f8fafc;
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    --sidebar-border: rgba(255, 255, 255, 0.05);
 
     /* --- Navbar --- */
-    --navbar-bg: rgba(15, 23, 42, 0.9);
-    --navbar-border: #334155;
+    --navbar-bg: rgba(11, 17, 33, 0.85);
+    --navbar-border: #1f2937;
 
     /* --- Tables --- */
-    --table-header-bg: #0f172a;
-    --table-row-hover: rgba(255, 255, 255, 0.03);
+    --table-header-bg: rgba(17, 24, 39, 0.5);
+    --table-row-hover: rgba(56, 189, 248, 0.05);
     --table-stripe: rgba(255, 255, 255, 0.015);
 
     /* --- Inputs / Formulaires --- */
-    --input-bg: #0f172a;
-    --input-border: #334155;
-    --input-focus: #818cf8;
-    --input-focus-ring: rgba(129, 140, 248, 0.2);
+    --input-bg: rgba(17, 24, 39, 0.5);
+    --input-border: #374151;
+    --input-focus: #38bdf8;
+    --input-focus-ring: rgba(56, 189, 248, 0.2);
 
     /* --- Bouton Principal --- */
-    --btn-primary-bg: #818cf8;
-    --btn-primary-text: #0f172a;
-    --btn-primary-hover: #6366f1;
-    --btn-primary-ring: rgba(129, 140, 248, 0.25);
+    --btn-primary-bg: #38bdf8;
+    --btn-primary-text: #0b1121;
+    --btn-primary-hover: #0ea5e9;
+    --btn-primary-ring: rgba(56, 189, 248, 0.3);
 
     /* --- Badges / Status --- */
     --badge-success-bg: rgba(74, 222, 128, 0.12);
@@ -259,9 +259,9 @@ textarea,
 .card,
 .modal-content {
     transition: background-color 0.3s ease,
-                color 0.3s ease,
-                border-color 0.3s ease,
-                box-shadow 0.3s ease;
+        color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 
@@ -270,13 +270,18 @@ textarea,
    ================================================================ */
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-primary);
     overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--text-primary);
 }
 
@@ -314,7 +319,7 @@ h1, h2, h3, h4, h5, h6 {
 .theme-toggle-btn .theme-icon {
     font-size: 16px;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.3s ease;
+        opacity 0.3s ease;
 }
 
 .theme-toggle-btn:hover .theme-icon {
@@ -323,9 +328,17 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Animation de rotation au changement */
 @keyframes themeSwitch {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(0.7); }
-    100% { transform: rotate(360deg) scale(1); }
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(0.7);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
 }
 
 .theme-switching .theme-icon {
@@ -382,9 +395,17 @@ h1, h2, h3, h4, h5, h6 {
 /* ================================================================
    INDICATEURS DE NIVEAU DE STOCK
    ================================================================ */
-.stock-normal { color: var(--stock-normal-color); }
-.stock-faible { color: var(--stock-faible-color); }
-.stock-epuise { color: var(--stock-epuise-color); }
+.stock-normal {
+    color: var(--stock-normal-color);
+}
+
+.stock-faible {
+    color: var(--stock-faible-color);
+}
+
+.stock-epuise {
+    color: var(--stock-epuise-color);
+}
 
 .stock-indicator {
     display: inline-flex;
@@ -400,16 +421,29 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50%;
 }
 
-.stock-dot--normal  { background-color: var(--stock-normal-color); box-shadow: 0 0 6px var(--stock-normal-color); }
-.stock-dot--faible  { background-color: var(--stock-faible-color); box-shadow: 0 0 6px var(--stock-faible-color); }
-.stock-dot--epuise  { background-color: var(--stock-epuise-color); box-shadow: 0 0 6px var(--stock-epuise-color); }
+.stock-dot--normal {
+    background-color: var(--stock-normal-color);
+    box-shadow: 0 0 6px var(--stock-normal-color);
+}
+
+.stock-dot--faible {
+    background-color: var(--stock-faible-color);
+    box-shadow: 0 0 6px var(--stock-faible-color);
+}
+
+.stock-dot--epuise {
+    background-color: var(--stock-epuise-color);
+    box-shadow: 0 0 6px var(--stock-epuise-color);
+}
 
 
 /* ================================================================
    SURCHARGES BOOTSTRAP POUR DARK MODE
    ================================================================ */
 .dark .bg-white,
-[data-theme="dark"] .bg-white { background-color: var(--bg-card) !important; }
+[data-theme="dark"] .bg-white {
+    background-color: var(--bg-card) !important;
+}
 
 .dark .bg-light,
 [data-theme="dark"] .bg-light {
@@ -418,14 +452,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark .text-dark,
-[data-theme="dark"] .text-dark { color: var(--text-primary) !important; }
+[data-theme="dark"] .text-dark {
+    color: var(--text-primary) !important;
+}
 
 .dark .border,
 .dark .border-bottom,
 .dark .border-top,
 [data-theme="dark"] .border,
 [data-theme="dark"] .border-bottom,
-[data-theme="dark"] .border-top { border-color: var(--border-color) !important; }
+[data-theme="dark"] .border-top {
+    border-color: var(--border-color) !important;
+}
 
 .dark .card,
 [data-theme="dark"] .card {

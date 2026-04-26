@@ -9,10 +9,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    use \App\Traits\BelongsToUser;
+
     protected $fillable = [
-        'name', 'sku', 'description', 'image',
-        'price', 'purchase_price', 'selling_price', 'quantity', 'min_stock', 
-        'category_id'
+        'name', 
+        'sku', 
+        'description', 
+        'image',
+        'price', 
+        'purchase_price', 
+        'selling_price', 
+        'quantity', 
+        'min_stock', 
+        'category_id',
+        'user_id',
     ];
 
     protected $casts = [
@@ -36,6 +46,11 @@ class Product extends Model
     public function batches(): HasMany
     {
         return $this->hasMany(ProductBatch::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function isLowStock(): bool
