@@ -64,48 +64,67 @@ class AICategoryService
             . "}";
 
         foreach ($this->models as $model) {
-            $result = $this->callGemini($model, $prompt);
+            try {
+                $result = $this->callGemini($model, $prompt);
 
-            if ($result !== null && isset($result['assigned_category'])) {
-                $categoryName = $result['assigned_category'];
-                $isNew = filter_var($result['is_new_category'] ?? false, FILTER_VALIDATE_BOOLEAN);
-                $categoryId = null;
+                if ($result !== null && isset($result['assigned_category'])) {
+                    // S'assurer que le nom est une chaîne
+                    $categoryName = is_array($result['assigned_category']) 
+                        ? ($result['assigned_category']['name'] ?? 'Inconnu') 
+                        : (string)$result['assigned_category'];
+                    
+                    $isNew = filter_var($result['is_new_category'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                    $categoryId = null;
 
-                // 3. Gérer la catégorie (Exstante ou Nouvelle)
-                if (!$isNew) {
-                    $category = $categories->first(fn($c) => strtolower($c->name) === strtolower($categoryName));
-                    if ($category) {
-                        $categoryId = $category->id;
-                        $categoryName = $category->name; // Utiliser le nom exact en DB
-                    } else {
-                        // Si l'IA dit que ce n'est pas nouveau mais on ne trouve pas, on considère comme nouveau ou on cherche mieux
-                        $isNew = true;
+                    // 3. Gérer la catégorie (Existante ou Nouvelle)
+                    $existingCategory = $categories->first(function($c) use ($categoryName) {
+                        return strtolower(trim($c->name)) === strtolower(trim($categoryName));
+                    });
+
+                    if ($existingCategory) {
+                        $categoryId = $existingCategory->id;
+                        $categoryName = $existingCategory->name;
+                        $isNew = false;
                     }
-                }
 
-                if ($isNew) {
-                    // Création de la nouvelle catégorie
-                    $category = Category::create([
-                        'name'    => ucfirst(strtolower($categoryName)),
-                        'user_id' => $userId ?? auth()->id(),
-                        'description' => 'Créé automatiquement par IA pour: ' . $productName
-                    ]);
-                    $categoryId = $category->id;
-                    $categoryName = $category->name;
-                }
+                    if ($isNew) {
+                        try {
+                            // Création de la nouvelle catégorie
+                            $category = Category::create([
+                                'name'    => ucfirst(strtolower(trim($categoryName))),
+                                'user_id' => $userId ?? auth()->id(),
+                                'description' => 'Créé automatiquement par IA pour: ' . $productName
+                            ]);
+                            $categoryId = $category->id;
+                            $categoryName = $category->name;
+                        } catch (\Exception $dbEx) {
+                            Log::error("Erreur création catégorie IA: " . $dbEx->getMessage());
+                            // Fallback: essayer de trouver si elle a été créée entre temps ou utiliser une existante
+                            $fallbackCat = Category::where('name', trim($categoryName))->first();
+                            if ($fallbackCat) {
+                                $categoryId = $fallbackCat->id;
+                                $isNew = false;
+                            } else {
+                                return $this->errorResponse('Erreur lors de la création de la catégorie suggérée.');
+                            }
+                        }
+                    }
 
-                return [
-                    'success'           => true,
-                    'product_name'      => $productName,
-                    'assigned_category' => $categoryName,
-                    'category_id'       => $categoryId,
-                    'is_new_category'   => $isNew,
-                    'confidence'        => $result['confidence'] ?? 'medium',
-                    'reasoning'         => $result['reasoning'] ?? 'Analyse IA.',
-                    // Add legacy support fields if needed, or handle in controller/JS
-                    'category_name'     => $categoryName, 
-                    'reason'            => $result['reasoning'] ?? 'Analyse IA.',
-                ];
+                    return [
+                        'success'           => true,
+                        'product_name'      => $productName,
+                        'assigned_category' => $categoryName,
+                        'category_id'       => $categoryId,
+                        'is_new_category'   => $isNew,
+                        'confidence'        => $result['confidence'] ?? 'medium',
+                        'reasoning'         => $result['reasoning'] ?? 'Analyse IA.',
+                        'category_name'     => $categoryName, 
+                        'reason'            => $result['reasoning'] ?? 'Analyse IA.',
+                    ];
+                }
+            } catch (\Exception $loopEx) {
+                Log::error("Erreur boucle IA [{$model}]: " . $loopEx->getMessage());
+                continue;
             }
         }
 

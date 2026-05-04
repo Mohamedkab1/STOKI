@@ -22,24 +22,36 @@ class AICategoryController extends Controller
      */
     public function suggestCategory(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name'        => 'required|string|min:2|max:255',
-            'description' => 'nullable|string|max:1000',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name'        => 'required|string|min:2|max:255',
+                'description' => 'nullable|string|max:1000',
+            ]);
 
-        $result = $this->aiService->suggestCategory(
-            productName : $validated['name'],
-            description : $validated['description'] ?? '',
-            userId      : auth()->id(),
-        );
+            $result = $this->aiService->suggestCategory(
+                productName : $validated['name'],
+                description : $validated['description'] ?? '',
+                userId      : auth()->id(),
+            );
 
-        if (!$result['success']) {
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'],
+                ], 422);
+            }
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            \Log::error('AI Suggestion Error: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+                'input' => $request->all()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $result['message'],
-            ], 422);
+                'message' => 'Erreur interne du serveur: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json($result);
     }
 }
