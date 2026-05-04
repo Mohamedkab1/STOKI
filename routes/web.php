@@ -8,6 +8,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\AICategoryController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -39,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
 
     // ========== DASHBOARD ==========
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ========== IA - CATÉGORISATION AUTOMATIQUE ==========
+    Route::post('/ai/suggest-category', [AICategoryController::class, 'suggestCategory'])
+        ->name('ai.suggest-category');
 
     // ========== GESTION DES PRODUITS ==========
     Route::resource('products', ProductController::class);

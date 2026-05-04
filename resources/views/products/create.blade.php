@@ -38,15 +38,49 @@
 
                             <div>
                                 <x-forms.label for="category_id" :required="true">Catégorie</x-forms.label>
-                                <select name="category_id" id="category_id" class="w-full rounded-lg border border-border-subtle bg-white px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-primary/10 focus:border-brand-primary focus:outline-none transition-all" required>
-                                    <option value="">Choisir...</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('category_id') <p class="text-[10px] font-bold text-rose-500 mt-1 uppercase">{{ $message }}</p> @enderror
+
+                                {{-- Wrapper bouton IA + select --}}
+                                <div class="flex items-center gap-2 mt-1">
+                                    <select name="category_id" id="category_id"
+                                        class="flex-1 rounded-lg border border-border-subtle bg-white px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-primary/10 focus:border-brand-primary focus:outline-none transition-all"
+                                        required>
+                                        <option value="">Choisir...</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    {{-- Bouton IA --}}
+                                    <button type="button" id="ai-suggest-btn"
+                                        onclick="suggestCategoryWithAI()"
+                                        title="Suggérer une catégorie avec l'IA"
+                                        class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-bold
+                                               bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md
+                                               hover:from-violet-500 hover:to-indigo-500 hover:shadow-lg hover:scale-105
+                                               active:scale-95 transition-all duration-200 cursor-pointer border-0">
+                                        <i class="fas fa-wand-magic-sparkles" id="ai-btn-icon"></i>
+                                        <span id="ai-btn-text">IA</span>
+                                    </button>
+                                </div>
+
+                                {{-- Badge résultat IA (caché par défaut) --}}
+                                <div id="ai-result-badge" class="hidden mt-2 flex items-start gap-2 p-2.5 rounded-lg border text-xs">
+                                    <i class="fas fa-robot mt-0.5 flex-shrink-0" id="ai-badge-icon"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="ai-badge-text" class="font-semibold"></p>
+                                        <p id="ai-badge-reason" class="opacity-75 mt-0.5 leading-snug"></p>
+                                    </div>
+                                    <button type="button" onclick="dismissAIBadge()"
+                                        class="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity ml-1">
+                                        <i class="fas fa-times text-[10px]"></i>
+                                    </button>
+                                </div>
+
+                                @error('category_id')
+                                    <p class="text-[10px] font-bold text-rose-500 mt-1 uppercase">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -123,32 +157,167 @@
 </div>
 
 <script>
+// ============================================================
+// Aperçu image
+// ============================================================
 function previewImage(input) {
     const placeholder = document.getElementById('preview-placeholder');
-    const preview = document.getElementById('image-preview');
+    const preview     = document.getElementById('image-preview');
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = e => {
             preview.src = e.target.result;
             preview.classList.remove('hidden');
             placeholder.classList.add('hidden');
-        }
+        };
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-// Auto-calcul du prix de vente (Simple Logic)
-document.getElementById('purchase_price').addEventListener('input', function() {
+// ============================================================
+// Auto-calcul prix de vente (+30%)
+// ============================================================
+document.getElementById('purchase_price').addEventListener('input', function () {
     const purchase = parseFloat(this.value);
     if (!isNaN(purchase)) {
         const selling = (purchase * 1.3).toFixed(2);
-        document.getElementById('selling_price').value = selling;
+        document.getElementById('selling_price').value        = selling;
         document.getElementById('hidden_selling_price').value = selling;
     }
 });
-
-document.getElementById('selling_price').addEventListener('input', function() {
+document.getElementById('selling_price').addEventListener('input', function () {
     document.getElementById('hidden_selling_price').value = this.value;
 });
+
+// ============================================================
+// 🤖 IA — Suggestion automatique de catégorie
+// ============================================================
+async function suggestCategoryWithAI() {
+    const nameInput  = document.getElementById('name');
+    const descInput  = document.getElementById('description');
+    const btn        = document.getElementById('ai-suggest-btn');
+    const btnIcon    = document.getElementById('ai-btn-icon');
+    const btnText    = document.getElementById('ai-btn-text');
+    const badge      = document.getElementById('ai-result-badge');
+    const badgeText  = document.getElementById('ai-badge-text');
+    const badgeReason= document.getElementById('ai-badge-reason');
+    const badgeIcon  = document.getElementById('ai-badge-icon');
+    const select     = document.getElementById('category_id');
+
+    const name = nameInput.value.trim();
+    if (!name || name.length < 2) {
+        nameInput.focus();
+        nameInput.classList.add('ring-2', 'ring-amber-400', 'border-amber-400');
+        setTimeout(() => nameInput.classList.remove('ring-2', 'ring-amber-400', 'border-amber-400'), 2000);
+        return;
+    }
+
+    // --- État: chargement ---
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+    btnIcon.className = 'fas fa-spinner fa-spin';
+    btnText.textContent = '...';
+    badge.classList.add('hidden');
+
+    try {
+        const response = await fetch('{{ route("ai.suggest-category") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN' : '{{ csrf_token() }}',
+                'Accept'       : 'application/json',
+            },
+            body: JSON.stringify({
+                name       : name,
+                description: descInput ? descInput.value.trim() : '',
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Erreur inconnue');
+        }
+
+        // --- Sélectionner la catégorie dans le <select> ---
+        let found = false;
+        for (const option of select.options) {
+            if (parseInt(option.value) === data.category_id) {
+                option.selected = true;
+                found = true;
+                break;
+            }
+        }
+
+        // Si la catégorie est nouvelle et n'était pas dans le select, on l'ajoute
+        if (!found && data.category_id) {
+            const newOption = new Option(data.assigned_category, data.category_id, true, true);
+            select.add(newOption);
+            found = true;
+        }
+
+        // --- Calculer la couleur selon la confiance ---
+        let confidenceLevel = data.confidence.toLowerCase();
+        let colorClasses = '';
+        let iconClass = '';
+        let pctText = '';
+
+        if (confidenceLevel === 'high') {
+            colorClasses = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+            iconClass = 'fa-circle-check';
+            pctText = 'Élevée';
+        } else if (confidenceLevel === 'medium') {
+            colorClasses = 'bg-amber-50 border-amber-200 text-amber-800';
+            iconClass = 'fa-triangle-exclamation';
+            pctText = 'Moyenne';
+        } else {
+            colorClasses = 'bg-rose-50 border-rose-200 text-rose-800';
+            iconClass = 'fa-circle-xmark';
+            pctText = 'Faible';
+        }
+
+        badge.className = `mt-2 flex items-start gap-2 p-2.5 rounded-lg border text-xs ${colorClasses}`;
+        badgeIcon.className = `fas ${iconClass} mt-0.5 flex-shrink-0`;
+        
+        badgeText.textContent = `✨ IA suggère : ${data.assigned_category} (Confiance: ${pctText})`;
+        badgeReason.textContent = data.reasoning;
+
+        if (data.is_new_category) {
+            badgeText.textContent += ' [NOUVELLE]';
+        }
+
+        badge.classList.remove('hidden');
+
+        // --- Animation succès sur le bouton ---
+        btnIcon.className = 'fas fa-check';
+        btnText.textContent = 'OK!';
+        btn.classList.remove('from-violet-600', 'to-indigo-600');
+        btn.classList.add('from-emerald-500', 'to-teal-500');
+        setTimeout(() => {
+            btnIcon.className = 'fas fa-wand-magic-sparkles';
+            btnText.textContent = 'IA';
+            btn.classList.remove('from-emerald-500', 'to-teal-500');
+            btn.classList.add('from-violet-600', 'to-indigo-600');
+        }, 2500);
+
+    } catch (error) {
+        // --- État: erreur ---
+        badge.className = 'mt-2 flex items-start gap-2 p-2.5 rounded-lg border text-xs bg-rose-50 border-rose-200 text-rose-800';
+        badgeIcon.className = 'fas fa-circle-xmark mt-0.5 flex-shrink-0';
+        badgeText.textContent = '❌ Erreur IA';
+        badgeReason.textContent = error.message || 'Impossible de contacter le service IA.';
+        badge.classList.remove('hidden');
+
+        btnIcon.className = 'fas fa-wand-magic-sparkles';
+        btnText.textContent = 'IA';
+    } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+    }
+}
+
+function dismissAIBadge() {
+    document.getElementById('ai-result-badge').classList.add('hidden');
+}
 </script>
 @endsection
