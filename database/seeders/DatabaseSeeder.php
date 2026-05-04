@@ -17,22 +17,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Créer le Super Admin
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@stoki.com',
-            'password' => Hash::make('password'),
-            'role' => 'superadmin',
-            'status' => 'active',
-        ]);
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'superadmin@stoki.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'role' => 'superadmin',
+                'status' => 'active',
+            ]
+        );
 
         // 2. Créer un Admin par défaut
-        $admin = User::create([
-            'name' => 'Admin Stoki',
-            'email' => 'admin@stoki.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'status' => 'active',
-        ]);
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@stoki.com'],
+            [
+                'name' => 'Admin Stoki',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'status' => 'active',
+            ]
+        );
 
         // 3. Créer des catégories pour l'admin par défaut
         $categories = [
@@ -42,7 +46,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $catData) {
-            Category::create($catData);
+            Category::updateOrCreate(
+                ['name' => $catData['name'], 'user_id' => $catData['user_id']],
+                $catData
+            );
         }
 
         // 4. Créer des produits pour l'admin par défaut
@@ -72,16 +79,23 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($products as $prodData) {
-            Product::create($prodData);
+            Product::updateOrCreate(
+                ['sku' => $prodData['sku']],
+                $prodData
+            );
         }
 
-        // 5. Mouvements de stock
-        StockMovement::create([
-            'product_id' => 1,
-            'type' => 'in',
-            'quantity' => 10,
-            'reason' => 'Réapprovisionnement',
-            'user_id' => $admin->id
-        ]);
+        // 5. Mouvements de stock (on évite de recréer si déjà existant pour le même produit/raison)
+        StockMovement::firstOrCreate(
+            [
+                'product_id' => 1,
+                'reason' => 'Réapprovisionnement',
+                'quantity' => 10,
+            ],
+            [
+                'type' => 'in',
+                'user_id' => $admin->id
+            ]
+        );
     }
 }
